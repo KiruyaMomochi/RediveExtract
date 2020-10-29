@@ -25,7 +25,7 @@ jobs:
       run: dotnet run --configuration Release --no-restore
     - name: Commit files
       run: |
-        if [[ -z $(git status -s) ]] 
+        if [[ -n $(git status -s) ]] 
         then
         git config --global user.name 'KiruyaMomochi'
         git config --global user.email 'KiruyaMomochi@users.noreply.github.com'
