@@ -44,6 +44,8 @@ namespace RediveManifest
         [JsonIgnore]
         public string MoviePath => $"dl/Resources/{TruthVersionString}/{Locale}/Movie/SP/High/";
         [JsonIgnore]
+        public string LowMoviePath => $"dl/Resources/{TruthVersionString}/{Locale}/Movie/SP/Low/";
+        [JsonIgnore]
         public string SoundPath => $"dl/Resources/{TruthVersionString}/{Locale}/Sound/";
         [JsonIgnore]
         public string BundlesPath => $"dl/Bundles/{VersionString}/{Locale}/AssetBundles/{OS}/";
@@ -107,6 +109,7 @@ namespace RediveManifest
             var manifests = await GetManifest(config.ManifestPath + "manifest/manifest_assetmanifest", "manifest/manifest_assetmanifest");
             tasks.Add(SaveManifest(config.BundlesPath + "manifest/bdl_assetmanifest", "manifest/bdl_assetmanifest"));
             tasks.Add(SaveManifest(config.MoviePath + "manifest/moviemanifest", "manifest/moviemanifest"));
+            tasks.Add(SaveManifest(config.LowMoviePath + "manifest/moviemanifest", "manifest/low_moviemanifest"));
             tasks.Add(SaveManifest(config.SoundPath + "manifest/sound2manifest", "manifest/sound2manifest"));
 
             foreach (var assest_manifest in ParseAssestManifest(manifests))
