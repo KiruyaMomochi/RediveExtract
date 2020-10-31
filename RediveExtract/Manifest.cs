@@ -130,7 +130,7 @@ namespace RediveExtract
         {
             var manifests = await GetManifest(requestUri);
             await System.IO.File.WriteAllTextAsync(writePath, manifests);
-            Console.WriteLine($"+ {requestUri}");
+            Console.WriteLine($"- {requestUri}");
             return manifests;
         }
         
