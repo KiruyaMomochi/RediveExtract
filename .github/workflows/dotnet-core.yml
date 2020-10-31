@@ -1,4 +1,4 @@
-name: .NET Core
+name: Fetch latest manifests
 
 on:
   push:
@@ -42,7 +42,7 @@ jobs:
             $json = cat .\config.json | ConvertFrom-Json
             $taipei = [System.TimeZoneInfo]::FindSystemTimeZoneById('Taipei Standard Time')
             $time = [System.TimeZoneInfo]::ConvertTimeBySystemTimeZoneId((Get-Date), 'Taipei Standard Time').ToString("yyyy-MM-dd HH:mm:ss")
-            $message = "Auto: $($json.Version -join '.')($($json.TruthVersion)) at $time"
+            $message = "Manifest: $($json.Version -join '.')($($json.TruthVersion)) at $time"
             git status -s
             git config --global user.name 'KiruyaMomochi'
             git config --global user.email 'KiruyaMomochi@users.noreply.github.com'
