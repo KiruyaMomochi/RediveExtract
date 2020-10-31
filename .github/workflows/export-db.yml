@@ -4,9 +4,7 @@ name: Fetch Master Database
 
 on:
   push:
-    paths:
-    - 'manifest/masterdata_assetmanifest'
-    - '.github/workflows/export.db.yml'
+    branches: [ master ]
 
 defaults:
     run:
