@@ -35,7 +35,7 @@ jobs:
         if (git status -s)
         {
             $json = cat .\config.json | ConvertFrom-Json
-            $taipei = [System.TimeZoneInfo]::FindSystemTimeZoneById('Taipei Standard Time')
+            $taipei = [System.TimeZoneInfo]::FindSystemTimeZoneById('Asia/Taipei')
             $time = [System.TimeZoneInfo]::ConvertTimeBySystemTimeZoneId((Get-Date), 'Taipei Standard Time').ToString("yyyy-MM-dd HH:mm:ss")
             $message = "Database: $($json.Version -join '.')($($json.TruthVersion)) at $time"
             git status -s
