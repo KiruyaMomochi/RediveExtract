@@ -3,6 +3,8 @@ name: Fetch latest manifests
 on:
   push:
     branches: [ master ]
+    paths-ignore:
+    - 'db/**'
   pull_request:
     branches: [ master ]
   schedule:

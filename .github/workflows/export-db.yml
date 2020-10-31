@@ -45,8 +45,8 @@ jobs:
             git push
         }
     - name: Upload database
-    uses: actions/upload-artifact@v2
-    with:
-      name: master-database
-      path: |
-      !*.sqlite
+      uses: actions/upload-artifact@v2
+      with:
+        name: master-database
+        path: |
+          !*.sqlite
