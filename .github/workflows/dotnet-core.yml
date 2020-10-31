@@ -8,19 +8,27 @@ on:
   schedule:
     - cron: 0 * * * *
 
+defaults:
+  run:
+    shell: pwsh
+
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: true
-    - name: Setup .NET Core
+    - name: Setup .NET Core 3.1.x
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.x
+    - name: Setup .NET 5.0.0-rc.2
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.0-rc.2
     - name: Install dependencies
       run: dotnet restore
     - name: Build
@@ -29,11 +37,11 @@ jobs:
       run: dotnet run --project RediveExtract --configuration Release --no-restore
     - name: Commit files
       run: |
-        if [[ -n $(git status -s) ]] 
-        then
-        git config --global user.name 'KiruyaMomochi'
-        git config --global user.email 'KiruyaMomochi@users.noreply.github.com'
-        git add .
-        git commit -m "Auto update: $(TZ=Asia/Taipei date -Iseconds)"
-        git push
-        fi
+        if (git status -s)
+        {
+            git config --global user.name 'KiruyaMomochi'
+            git config --global user.email 'KiruyaMomochi@users.noreply.github.com'
+            git add .
+            git commit -m "Auto update: $(TZ=Asia/Taipei date -Iseconds)"
+            git push
+        }
