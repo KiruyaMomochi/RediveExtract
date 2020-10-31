@@ -1,4 +1,4 @@
-name: Fetch latest manifests
+name: Fetch Latest Manifests
 
 on:
   push:

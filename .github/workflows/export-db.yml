@@ -6,6 +6,7 @@ on:
   push:
     paths:
     - 'manifest/masterdata_assetmanifest'
+    - '.github/workflows/export.db.yml'
 
 defaults:
     run:
