@@ -5,6 +5,7 @@ on:
     branches: [ master ]
     paths-ignore:
     - 'db/**'
+    - '.github/workflows/export-db.yml'
   pull_request:
     branches: [ master ]
   schedule:
