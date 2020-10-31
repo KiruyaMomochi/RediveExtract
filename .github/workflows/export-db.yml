@@ -5,6 +5,8 @@ name: Fetch Master Database
 on:
   push:
     branches: [ master ]
+    paths:
+      - 'manifest/masterdata_assetmanifest'
 
 defaults:
     run:
