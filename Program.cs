@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
@@ -29,7 +28,7 @@ namespace RediveExtract
 
         public static ManifestItem Parse(string text) => new ManifestItem(text);
 
-        public static ParallelQuery<ManifestItem> ParseAll(string manifests) =>
+        public static IEnumerable<ManifestItem> ParseAll(string manifests) =>
             manifests.Split().AsParallel().Where(x => x != "").Select(ManifestItem.Parse);
     }
 
@@ -38,7 +37,7 @@ namespace RediveExtract
         public int TruthVersion { get; set; } = 14016;
         public string OS { get; set; } = "Android";
         public string Locale { get; set; } = "Jpn";
-        public int[] Version { get; set; } = { 2, 2, 0 };
+        public int[] Version { get; set; } = {2, 2, 0};
 
         [JsonIgnore] private string TruthVersionString => TruthVersion.ToString("D8");
         [JsonIgnore] private string VersionString => $"{Version[0]}.{Version[1]}.{Version[2]}";
@@ -69,7 +68,10 @@ namespace RediveExtract
             Tasks.Add(SaveSoundManifest());
 
             foreach (var assetManifest in ManifestItem.ParseAll(manifests))
-                Tasks.Add(SaveManifest(_config.ManifestPath + assetManifest.Uri, assetManifest.Uri));
+                Tasks.Add(UpdateManifest(
+                    _config.ManifestPath + assetManifest.Uri,
+                    assetManifest.Uri,
+                    assetManifest.Md5));
 
             Task.WaitAll(Tasks.ToArray());
             Tasks.Clear();

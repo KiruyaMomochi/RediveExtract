@@ -1,5 +1,7 @@
 using System;
+using System.IO;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 // ReSharper disable StringLiteralTypo
 
@@ -15,15 +17,15 @@ namespace RediveExtract
             _config.BundlesPath + "manifest/bdl_assetmanifest",
             "manifest/bdl_assetmanifest");
 
-        private static Task SaveMovieManifest() => SaveManifest(
+        private static Task<string> SaveMovieManifest() => SaveManifest(
             _config.MoviePath + "manifest/moviemanifest",
             "manifest/moviemanifest");
         
-        private static Task SaveLowMovieManifest() => SaveManifest(
+        private static Task<string> SaveLowMovieManifest() => SaveManifest(
             _config.LowMoviePath + "manifest/moviemanifest",
             "manifest/low_moviemanifest");
 
-        private static Task SaveSoundManifest() => SaveManifest(
+        private static Task<string> SaveSoundManifest() => SaveManifest(
             _config.SoundPath + "manifest/sound2manifest",
             "manifest/sound2manifest");
 
@@ -110,6 +112,22 @@ namespace RediveExtract
             await System.IO.File.WriteAllTextAsync(writePath, manifests);
             Console.WriteLine(requestUri);
             return manifests;
+        }
+        
+        private static async Task UpdateManifest(string requestUri, string writePath, string md5Sum)
+        {
+            if (File.Exists(writePath))
+            {
+                using var md5 = MD5.Create();
+                await using var stream = File.OpenRead(writePath);
+                var realSum = BitConverter.ToString(md5.ComputeHash(stream)).Replace("-", "");
+                if (string.Equals(realSum, md5Sum, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return;
+                }
+            }
+
+            await SaveManifest(requestUri, writePath);
         }
     }
 }
