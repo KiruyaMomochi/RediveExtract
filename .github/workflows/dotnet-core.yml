@@ -45,6 +45,7 @@ jobs:
       run: |
         if ((git status '.\manifest\masterdata_assetmanifest' -s) -or !(Test-Path db))
         {
+          echo "output set"
           echo "::set-output name=flag::true"
         }
     - name: Commit files
@@ -68,7 +69,7 @@ jobs:
     runs-on: ubuntu-latest
     
     needs: fetch-manifest
-    if: ${{ needs.fetch-manifest.outputs.flag }}
+    # if: ${{ needs.fetch-manifest.outputs.flag }}
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.8
