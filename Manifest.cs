@@ -1,3 +1,4 @@
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 // ReSharper disable StringLiteralTypo
@@ -107,6 +108,7 @@ namespace RediveExtract
         {
             var manifests = await GetManifest(requestUri);
             await System.IO.File.WriteAllTextAsync(writePath, manifests);
+            Console.WriteLine(requestUri);
             return manifests;
         }
     }
