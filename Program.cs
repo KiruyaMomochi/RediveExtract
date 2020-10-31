@@ -101,10 +101,8 @@ namespace RediveManifest
             };
 
             await GuessNewVersion(config);
-            using (FileStream fs = File.OpenWrite(fileName))
-            {
-                tasks.Add(JsonSerializer.SerializeAsync(fs, config));
-            }
+            using FileStream fs = File.OpenWrite(fileName);
+            tasks.Add(JsonSerializer.SerializeAsync(fs, config));
 
             var manifests = await GetManifest(config.ManifestPath + "manifest/manifest_assetmanifest", "manifest/manifest_assetmanifest");
             tasks.Add(SaveManifest(config.BundlesPath + "manifest/bdl_assetmanifest", "manifest/bdl_assetmanifest"));
