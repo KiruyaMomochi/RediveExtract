@@ -10,14 +10,14 @@ namespace RediveExtract
         private static async Task<Config> GetConfig()
         {
             var config = new Config();
-            await using var fs = File.OpenRead(FileName);
             try
             {
+                await using var fs = File.OpenRead(FileName);
                 config = await JsonSerializer.DeserializeAsync<Config>(fs);
             }
             catch (Exception)
             {
-                // ignored
+                Console.WriteLine("! Warning: config.json not work.");
             }
 
             return config;

@@ -9,6 +9,26 @@ namespace RediveExtract
 {
     static partial class Program
     {
+        private static async Task SaveAllManifests()
+        {
+            var manifests = await SaveLatestAssetManifest();
+
+            Tasks.Add(SaveLatestBundleManifest());
+            Tasks.Add(SaveMovieManifest());
+            Tasks.Add(SaveLowMovieManifest());
+            Tasks.Add(SaveSoundManifest());
+
+            foreach (var assetManifest in ManifestItem.ParseAll(manifests))
+                Tasks.Add(UpdateManifest(
+                    _config.ManifestPath + assetManifest.Uri,
+                    assetManifest.Uri,
+                    assetManifest.Md5));
+
+            Task.WaitAll(Tasks.ToArray());
+            Tasks.Clear();
+            await SaveConfig();
+        }
+        
         private static Task<string> SaveAssetManifest() => SaveManifest(
             _config.ManifestPath + "manifest/manifest_assetmanifest",
             "manifest/manifest_assetmanifest");
@@ -110,7 +130,7 @@ namespace RediveExtract
         {
             var manifests = await GetManifest(requestUri);
             await System.IO.File.WriteAllTextAsync(writePath, manifests);
-            Console.WriteLine(requestUri);
+            Console.WriteLine($"+ {requestUri}");
             return manifests;
         }
         
