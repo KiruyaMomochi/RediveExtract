@@ -13,7 +13,7 @@ function Get-RedivePool {
 python -m pip install UnityPy
 $csv = Get-Content .\manifest\masterdata_assetmanifest | ConvertFrom-Csv -Header Path, md5, Category, Length
 
-$null = New-Item -ItemType Directory "db", "db/csv", "db/lines", "db/json"
+$null = New-Item -Force -ItemType Directory "db", "db/csv", "db/lines", "db/json"
 
 foreach ($item in $csv) {
     $db = $item.md5 + ".sqlite"
