@@ -3,7 +3,6 @@ name: Fetch Latest Manifests
 on:
   push:
     paths-ignore:
-    - 'db/**'
     - 'README.md'
   pull_request:
     branches: [ master ]
@@ -23,6 +22,11 @@ jobs:
       updated: ${{ steps.kyaru.outputs.flag }}
     steps:
     - uses: actions/checkout@v2
+    - name: Checkout RediveData
+      uses: actions/checkout@v2
+      with:
+        repository: "RediveData"
+        path: "./RediveData"
     - name: Setup .NET Core 3.1.x
       uses: actions/setup-dotnet@v1
       with:
@@ -36,16 +40,18 @@ jobs:
     - name: Build
       run: dotnet build --configuration Release --no-restore
     - name: Run
-      run: dotnet run --project RediveExtract --configuration Release --no-restore
+      run: dotnet run --project RediveExtract --configuration Release --no-restore -- --output RediveData
     - name: Set output for fetch database
       id: kyaru
+      working-directory: "./RediveData"
       run: |
-        if ((git status '.\manifest\masterdata_assetmanifest' -s) -or !(Test-Path db))
+        if ((git status './manifest/masterdata_assetmanifest' -s) -or !(Test-Path db))
         {
           echo "output set"
           echo "::set-output name=flag::true"
         }
     - name: Commit files
+      working-directory: "./RediveData"
       run: |
         if (git status -s)
         {
@@ -69,6 +75,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Checkout RediveData
+      uses: actions/checkout@v2
+      with:
+        repository: "RediveData"
+        path: "./RediveData"
     - name: Set up Python 3.8
       uses: actions/setup-python@v2
       with:
@@ -80,9 +91,11 @@ jobs:
         python -m pip install UnityPy
         Wait-Job $choco
     - name: Run Script
+      working-directory: "./RediveData"
       run: |
-        pwsh Scripts/Export-RediveDB.ps1
+        pwsh ../Scripts/Export-RediveDB.ps1
     - name: Commit Files
+      working-directory: "./RediveData"
       run: |
         if (git status -s)
         {
@@ -98,6 +111,7 @@ jobs:
             git push
         }
     - name: Upload database
+      working-directory: "./RediveData"
       uses: actions/upload-artifact@v2
       with:
         name: master-database
