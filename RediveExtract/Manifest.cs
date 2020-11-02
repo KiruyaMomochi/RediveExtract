@@ -145,17 +145,17 @@ namespace RediveExtract
         private static async Task<string> SaveManifest(string requestUri, string writePath)
         {
             var manifests = await GetManifest(requestUri);
-            await System.IO.File.WriteAllTextAsync(Path.Join(_outdir, writePath), manifests);
+            await System.IO.File.WriteAllTextAsync(writePath, manifests);
             Console.WriteLine($"- {requestUri}");
             return manifests;
         }
         
         private static async Task UpdateManifest(string requestUri, string writePath, string md5Sum)
         {
-            if (File.Exists(Path.Join(_outdir, writePath)))
+            if (File.Exists(writePath))
             {
                 using var md5 = MD5.Create();
-                await using var stream = File.OpenRead(Path.Join(_outdir, writePath));
+                await using var stream = File.OpenRead(writePath);
                 var realSum = BitConverter.ToString(md5.ComputeHash(stream)).Replace("-", "");
                 if (string.Equals(realSum, md5Sum, StringComparison.InvariantCultureIgnoreCase))
                 {
