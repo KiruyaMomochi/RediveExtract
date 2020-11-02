@@ -8,8 +8,8 @@ namespace RediveExtract
 {
     public struct ManifestItem
     {
-        public string Uri;
-        public string Md5;
+        public readonly string Uri;
+        public readonly string Md5;
         public string Category;
         public int Length;
 
