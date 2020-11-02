@@ -24,9 +24,6 @@ jobs:
       updated: ${{ steps.kyaru.outputs.flag }}
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/checkout@v2
-      repository: 'KiruyaMomochi/RediveData'
-      path: data
     - name: Setup .NET Core 3.1.x
       uses: actions/setup-dotnet@v1
       with:
@@ -40,7 +37,7 @@ jobs:
     - name: Build
       run: dotnet build --configuration Release --no-restore
     - name: Run
-      run: dotnet run --project RediveExtract --configuration Release --no-restore -- --outdir RediveData
+      run: dotnet run --project RediveExtract --configuration Release --no-restore
     - name: Set output for fetch database
       id: kyaru
       run: |

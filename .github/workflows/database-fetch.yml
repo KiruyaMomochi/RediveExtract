@@ -4,11 +4,7 @@ on:
   push:
     branches: [ master ]
     paths:
-    - 'db/**'
-  pull_request:
-    branches: [ master ]
-    paths:
-    - 'db/**'
+    - 'manifest/masterdata_assetmanifest'
 
 defaults:
   run:
