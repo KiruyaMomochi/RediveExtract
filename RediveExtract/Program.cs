@@ -15,14 +15,18 @@ namespace RediveExtract
         private const string BaseAddress = "https://img-pc.so-net.tw";
         private static FileInfo _configFile;
         private static Config _config;
+        private static string _outdir;
 
         /// <summary>
         /// Redive Extractor
         /// </summary>
         /// <param name="config">An option whose argument is parsed as a FileInfo. The default value is config.json</param>
-        private static async Task Main(FileInfo config = null)
+        /// <param name="outdir">Output path</param>
+        private static async Task Main(FileInfo config = null, string outdir = ".")
         {
             _configFile = config ?? new FileInfo("config.json");
+            _outdir = outdir;
+
             await Init();
             await SaveAllManifests();
         }
@@ -40,9 +44,13 @@ namespace RediveExtract
 
         private static void EnsureDirectory()
         {
-            if (!Directory.Exists("manifist"))
+            if (!Directory.Exists(_outdir))
             {
-                Directory.CreateDirectory("manifest");
+                Directory.CreateDirectory(_outdir);
+            }
+            if (!Directory.Exists(Path.Join(_outdir, "manifest")))
+            {
+                Directory.CreateDirectory(Path.Join(_outdir, "manifest"));
             }
         }
     }
