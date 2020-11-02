@@ -111,9 +111,8 @@ jobs:
             git push
         }
     - name: Upload database
-      working-directory: "./RediveData"
       uses: actions/upload-artifact@v2
       with:
         name: master-database
         path: |
-          *.sqlite
+          RediveData/*.sqlite
