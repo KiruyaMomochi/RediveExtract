@@ -25,7 +25,7 @@ jobs:
     - name: Checkout RediveData
       uses: actions/checkout@v2
       with:
-        repository: "RediveData"
+        repository: "KiruyaMomochi/RediveData"
         path: "./RediveData"
     - name: Setup .NET Core 3.1.x
       uses: actions/setup-dotnet@v1
