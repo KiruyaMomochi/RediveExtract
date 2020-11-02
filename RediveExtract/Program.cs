@@ -20,9 +20,13 @@ namespace RediveExtract
         /// Redive Extractor
         /// </summary>
         /// <param name="config">An option whose argument is parsed as a FileInfo. The default value is config.json</param>
-        private static async Task Main(FileInfo config = null)
+        /// <param name="output">The output path</param> 
+        private static async Task Main(FileInfo config = null, string output = ".")
         {
             _configFile = config ?? new FileInfo("config.json");
+            
+            Directory.CreateDirectory(output);
+            Directory.SetCurrentDirectory(output);
 
             await Init();
             await SaveAllManifests();
@@ -30,21 +34,12 @@ namespace RediveExtract
 
         private static async Task Init()
         {
-            EnsureDirectory();
             _config = await GetConfig();
 
             _httpClient = new HttpClient()
             {
                 BaseAddress = new Uri(BaseAddress)
             };
-        }
-
-        private static void EnsureDirectory()
-        {
-            if (!Directory.Exists("manifest"))
-            {
-                Directory.CreateDirectory("manifest");
-            }
         }
     }
 }

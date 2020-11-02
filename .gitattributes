@@ -2,8 +2,6 @@
 # Set default behavior to automatically normalize line endings.
 ###############################################################################
 * text=auto
-manifest/* -text
-db/* -text
 
 ###############################################################################
 # Set default behavior for command prompt diff.

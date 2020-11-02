@@ -11,6 +11,8 @@ namespace RediveExtract
     {
         private static async Task SaveAllManifests()
         {
+            Directory.CreateDirectory("manifest");
+            
             var manifests = await SaveLatestAssetManifest();
 
             Tasks.Add(SaveLatestBundleManifest());
@@ -31,7 +33,7 @@ namespace RediveExtract
         
         private static Task<string> SaveAssetManifest() => SaveManifest(
             _config.ManifestPath + "manifest/manifest_assetmanifest",
-            "manifest/manifest_assetmanifest");
+             "manifest/manifest_assetmanifest");
 
         private static Task<string> SaveBundleManifest() => SaveManifest(
             _config.BundlesPath + "manifest/bdl_assetmanifest",
@@ -130,7 +132,7 @@ namespace RediveExtract
             {
                 _config.TruthVersion--;
             }
-
+            
             return manifest;
         }
 
@@ -145,7 +147,8 @@ namespace RediveExtract
         private static async Task<string> SaveManifest(string requestUri, string writePath)
         {
             var manifests = await GetManifest(requestUri);
-            await System.IO.File.WriteAllTextAsync(writePath, manifests);
+            var realpath = Path.Combine(writePath);
+            await System.IO.File.WriteAllTextAsync(realpath, manifests);
             Console.WriteLine($"- {requestUri}");
             return manifests;
         }
