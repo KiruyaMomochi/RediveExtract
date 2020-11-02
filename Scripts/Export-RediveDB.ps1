@@ -10,8 +10,7 @@ function Get-RedivePool {
     Invoke-WebRequest -Uri "https://img-pc.so-net.tw/dl/pool/AssetBundles/$HashPre/$Hash" -OutFile $OutFile
 }
 
-$csv = Get-Content .\manifest\masterdata_assetmanifest | ConvertFrom-Csv -Header Path, md5, Category, Length
-
+$csv = Import-Csv .\manifest\masterdata_assetmanifest -Header Path, md5, Category, Length
 $null = New-Item -ItemType Directory "db", "db/csv", "db/lines", "db/json"
 
 foreach ($item in $csv) {

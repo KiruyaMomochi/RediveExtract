@@ -101,6 +101,22 @@ namespace RediveExtract
         private static async Task<string> SaveLatestAssetManifest()
         {
             var manifest = await SaveAssetManifest();
+            var oldVersion = _config.TruthVersion;
+
+            try
+            {
+                while (true)
+                {
+                    _config.TruthVersion = (_config.TruthVersion / 10 + 1) * 10;
+                    manifest = await SaveAssetManifest();
+                }
+            }
+            catch (HttpRequestException)
+            {
+                _config.TruthVersion = _config.TruthVersion - 10;
+                if (_config.TruthVersion < oldVersion)
+                    _config.TruthVersion = oldVersion;
+            }
 
             try
             {

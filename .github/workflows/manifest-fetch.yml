@@ -2,7 +2,6 @@ name: Fetch Latest Manifests
 
 on:
   push:
-    branches: [ master ]
     paths-ignore:
     - 'db/**'
     - 'README.md'
