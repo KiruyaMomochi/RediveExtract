@@ -11,7 +11,7 @@ function Get-RedivePool {
 }
 
 $csv = Import-Csv .\manifest\masterdata_assetmanifest -Header Path, md5, Category, Length
-$null = New-Item -ItemType Directory "db", "db/csv", "db/lines", "db/json"
+$null = New-Item -ItemType Directory "db", "db/csv", "db/lines", "db/json" -Force
 
 foreach ($item in $csv) {
     $db = $item.md5 + ".sqlite"
