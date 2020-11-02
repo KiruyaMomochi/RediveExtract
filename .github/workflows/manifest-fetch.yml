@@ -55,7 +55,7 @@ jobs:
       run: |
         if (git status -s)
         {
-            $json = Get-Content ./config.json | ConvertFrom-Json
+            $json = Get-Content "${env:GITHUB_WORKSPACE}/config.json" | ConvertFrom-Json
             $time = [System.TimeZoneInfo]::ConvertTimeBySystemTimeZoneId((Get-Date), 'Taipei Standard Time').ToString("yyyy-MM-dd HH:mm:ss")
             $message = "Manifest: $($json.Version -join '.')($($json.TruthVersion)) at $time"
             git status -s
