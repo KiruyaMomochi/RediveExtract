@@ -41,7 +41,7 @@ jobs:
     - name: Build
       run: dotnet build --configuration Release --no-restore
     - name: Run
-      run: dotnet run --project RediveExtract --configuration Release --no-restore -- --output RediveData
+      run: dotnet run --project RediveExtract --configuration Release --no-restore --  --config ./RediveData/config.json --output RediveData
     - name: Set output for fetch database
       id: kyaru
       working-directory: "./RediveData"
