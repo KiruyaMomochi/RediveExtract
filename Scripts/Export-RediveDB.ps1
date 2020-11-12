@@ -1,15 +1,4 @@
-function Get-RedivePool {
-    param (
-        [string]
-        $Hash,
-        [string]
-        $OutFile = $Hash
-    )
-
-    $HashPre = $Hash.Substring(0, 2)
-    Invoke-WebRequest -Uri "https://img-pc.so-net.tw/dl/pool/AssetBundles/$HashPre/$Hash" -OutFile $OutFile
-    return $OutFile
-}
+Import-Module $PSScriptRoot/Get-RedivePool.psm1
 
 $csv = Import-Csv .\manifest\masterdata_assetmanifest -Header Path, md5, Category, Length
 $null = New-Item -ItemType Directory "db", "db/csv", "db/lines", "db/json" -Force
