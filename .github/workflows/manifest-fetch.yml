@@ -20,7 +20,7 @@ jobs:
 
     outputs:
       db: ${{ steps.kyaru.outputs.db }}
-      story: ${{ steps.kyaru.outputs.story }}
+      story: ${{ steps.pecorine.outputs.story }}
     steps:
     - uses: actions/checkout@v2
     - name: Checkout RediveData
@@ -49,7 +49,7 @@ jobs:
           echo "::set-output name=db::true"
         }
     - name: Set output for fetch storytext
-      id: kyaru
+      id: pecorine
       working-directory: "./RediveData"
       run: |
         if ((git status './manifest/storydata_assetmanifest' -s) -or !(Test-Path storydata))
