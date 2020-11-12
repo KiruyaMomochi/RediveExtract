@@ -15,7 +15,7 @@ foreach ($item in $storydata) {
 }
 
 $all = Import-Csv .\manifest\storydata_assetmanifest -Header Path, md5, Category, Length
-$storydata = $updated | Where-Object Path -Match 'storydata_\d+.unity3d'
+$storydata = $all | Where-Object Path -Match 'storydata_\d+.unity3d'
 foreach ($item in $storydata) {
     $id = [regex]::Match($item.Path, 'storydata_(\d+).unity3d').Groups[1].Value
     if (Get-Item "storydata/*/$id.*") {

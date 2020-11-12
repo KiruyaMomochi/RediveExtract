@@ -33,12 +33,25 @@ namespace RediveStoryDeserializer
                     argList.Add(st);
                 }
 
-                commandList.Add(
-                    new Command
-                    {
-                        CommandConfig = CommandConfig.List[index],
-                        Args = argList.ToArray()
-                    });
+                if (index < CommandConfig.List.Length)
+                {
+                    commandList.Add(
+                        new Command
+                        {
+                            CommandConfig = CommandConfig.List[index],
+                            Args = argList.ToArray()
+                        });
+                }
+                else
+                {
+                    Console.WriteLine("Warning: list index out of range");
+                    commandList.Add(
+                        new Command
+                        {
+                            CommandConfig = null,
+                            Args = argList.ToArray()
+                        });
+                }
             }
 
             return commandList;
