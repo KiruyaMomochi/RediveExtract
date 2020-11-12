@@ -1,12 +1,12 @@
 Import-Module $PSScriptRoot/Get-RedivePool.psm1
 
 $null = New-Item -ItemType Directory "storydata", "storydata/yaml", "storydata/json" -Force
-$storydata = $csv | Where-Object Path -Match 'storydata_\d+.unity3d'
 
 $updated = git log -p -1 .\manifest\storydata_assetmanifest | Select-String '^\+(.*)' | % {$_.Matches.Groups[1].Value} | ConvertFrom-Csv -Header Path, md5, Category, Length
-foreach ($item in $updated) {
+$storydata = $updated | Where-Object Path -Match 'storydata_\d+.unity3d'
+foreach ($item in $storydata) {
     $id = [regex]::Match($item.Path, 'storydata_(\d+).unity3d').Groups[1].Value
-    
+
     Write-Host $id
     
     $null = Get-RedivePool -Hash ($item.md5)
@@ -15,7 +15,8 @@ foreach ($item in $updated) {
 }
 
 $all = Import-Csv .\manifest\storydata_assetmanifest -Header Path, md5, Category, Length
-foreach ($item in $all) {
+$storydata = $updated | Where-Object Path -Match 'storydata_\d+.unity3d'
+foreach ($item in $storydata) {
     $id = [regex]::Match($item.Path, 'storydata_(\d+).unity3d').Groups[1].Value
     if (Get-Item "storydata/*/$id.*") {
         continue
