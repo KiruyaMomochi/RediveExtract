@@ -28,14 +28,10 @@ jobs:
         repository: "KiruyaMomochi/RediveData"
         path: "./RediveData"
         token: ${{ secrets.REDIVEDATA_ACCESS_TOKEN }}
-    - name: Setup .NET Core 3.1.x
+    - name: Setup .NET Core 5.0.x
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.x
-    # - name: Setup .NET 5.0.100-rc.2.20479.15
-    #   uses: actions/setup-dotnet@v1
-    #   with:
-    #     dotnet-version: 5.0.100-rc.2.20479.15
+        dotnet-version: 5.0.x
     - name: Install dependencies
       run: dotnet restore
     - name: Build
