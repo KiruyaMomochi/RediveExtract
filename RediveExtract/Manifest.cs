@@ -115,7 +115,7 @@ namespace RediveExtract
             }
             catch (HttpRequestException)
             {
-                _config.TruthVersion = _config.TruthVersion - 10;
+                _config.TruthVersion = _config.TruthVersion - 1000;
                 if (_config.TruthVersion < oldVersion)
                     _config.TruthVersion = oldVersion;
             }
