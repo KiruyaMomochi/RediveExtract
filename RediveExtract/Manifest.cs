@@ -109,6 +109,21 @@ namespace RediveExtract
             {
                 while (true)
                 {
+                    _config.TruthVersion = (_config.TruthVersion / 1000 + 1) * 1000;
+                    manifest = await SaveAssetManifest();
+                }
+            }
+            catch (HttpRequestException)
+            {
+                _config.TruthVersion = _config.TruthVersion - 10;
+                if (_config.TruthVersion < oldVersion)
+                    _config.TruthVersion = oldVersion;
+            }
+            
+            try
+            {
+                while (true)
+                {
                     _config.TruthVersion = (_config.TruthVersion / 10 + 1) * 10;
                     manifest = await SaveAssetManifest();
                 }
