@@ -12,9 +12,9 @@ namespace RediveStoryDeserializer
         [JsonPropertyName("command")]
         public string CommandName => CommandConfig?.Name;
 
-        public string[] Args { get; init; }
-
         public CommandCategory? Category => CommandConfig?.CommandCategory;
+
+        public string[] Args { get; init; }
 
         [YamlIgnore]
         public CommandNumber? Number => CommandConfig?.Number;

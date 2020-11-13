@@ -33,28 +33,36 @@ namespace RediveStoryDeserializer
                     argList.Add(st);
                 }
 
-                if (index < CommandConfig.List.Length)
-                {
-                    commandList.Add(
-                        new Command
-                        {
-                            CommandConfig = CommandConfig.List[index],
-                            Args = argList.ToArray()
-                        });
-                }
-                else
-                {
-                    Console.WriteLine("Warning: list index out of range");
-                    commandList.Add(
-                        new Command
-                        {
-                            CommandConfig = null,
-                            Args = argList.ToArray()
-                        });
-                }
+                Command command = ParseCommand(index, argList);
+
+                commandList.Add(command);
             }
 
             return commandList;
+        }
+
+        private static Command ParseCommand(short index, List<string> argList)
+        {
+            Command command;
+            if (index < CommandConfig.List.Length)
+            {
+                command = new Command
+                {
+                    CommandConfig = CommandConfig.List[index],
+                    Args = argList.ToArray()
+                };
+            }
+            else
+            {
+                Console.WriteLine("Warning: list index out of range");
+                command = new Command
+                {
+                    CommandConfig = null,
+                    Args = argList.ToArray()
+                };
+            }
+
+            return command;
         }
     }
 }

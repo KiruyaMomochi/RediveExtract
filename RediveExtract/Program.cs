@@ -6,6 +6,8 @@ using System.CommandLine.Invocation;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Linq;
+using YamlDotNet.Serialization.NamingConventions;
 
 // ReSharper disable StringLiteralTypo
 
@@ -21,15 +23,19 @@ namespace RediveExtract
 
         private static void Main(string[] args)
         {
-            var rootCommand = new RootCommand("Redive Extractor");
-            rootCommand.Add(new Option<FileInfo>("--config"));
-            rootCommand.Add(new Option<string>("--output"));
+            var rootCommand = new RootCommand("Redive Extractor")
+            {
+                new Option<FileInfo>("--config"),
+                new Option<string>("--output")
+            };
             rootCommand.Handler = CommandHandler.Create<FileInfo, string>(Extract);
 
-            var deserialize = new System.CommandLine.Command("deserialize");
-            deserialize.Add(new Option<FileInfo>("--input"));
-            deserialize.Add(new Option<FileInfo>("--json"));
-            deserialize.Add(new Option<FileInfo>("--yaml"));
+            var deserialize = new System.CommandLine.Command("deserialize")
+            {
+                new Option<FileInfo>("--input"),
+                new Option<FileInfo>("--json"),
+                new Option<FileInfo>("--yaml")
+            };
             deserialize.Handler = CommandHandler.Create<FileInfo, FileInfo, FileInfo>(Deserialize);
 
             rootCommand.Add(deserialize);
@@ -57,6 +63,7 @@ namespace RediveExtract
         {
             if (input == null)
             {
+                Console.WriteLine("input?");
                 return;
             }
             if (json == null && yaml == null)
@@ -73,8 +80,12 @@ namespace RediveExtract
             }
             if (yaml != null)
             {
+                var serializer = new YamlDotNet.Serialization.SerializerBuilder()
+                    .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                    .Build();
                 using var sw = new StreamWriter(yaml.FullName, false);
-                cmds.ToYaml(sw);
+                var dicts = cmds.Select(x => x.ToDict()).Where(x => x != null);
+                serializer.Serialize(sw, dicts);
             }
         }
 
