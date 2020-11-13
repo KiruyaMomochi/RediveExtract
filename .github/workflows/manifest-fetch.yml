@@ -55,7 +55,7 @@ jobs:
         if ((git status './manifest/storydata_assetmanifest' -s) -or !(Test-Path storydata))
         {
           echo "output set"
-          # echo "::set-output name=story::true"
+          echo "::set-output name=story::true"
         }
     - name: Commit files
       working-directory: "./RediveData"
