@@ -10,7 +10,7 @@ function Save-RedivePool {
 
     $HashPre = $MD5.Substring(0, 2)
 
-    if ((Test-Path $Path) -and (Get-FileHash $Path -Algorithm MD5).MD5 -like $MD5) {
+    if ((Test-Path $Path) -and (Get-FileHash $Path -Algorithm MD5).Hash -like $MD5) {
         return $Path;
     }
 
