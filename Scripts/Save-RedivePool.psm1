@@ -23,7 +23,8 @@ function Save-RedivePool {
     }    
 
     $Private:ProgressPreference = "SilentlyContinue"
-    Start-BitsTransfer -Source "https://img-pc.so-net.tw/dl/pool/AssetBundles/$HashPre/$MD5" -Destination $Path
+    $null = Invoke-WebRequest -Uri "https://img-pc.so-net.tw/dl/pool/AssetBundles/$HashPre/$MD5" -OutFile $Path
+    return $Path
 }
 
 function Get-ManifestItem {
