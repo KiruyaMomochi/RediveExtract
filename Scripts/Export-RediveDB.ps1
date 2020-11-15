@@ -1,13 +1,13 @@
-Import-Module $PSScriptRoot/Get-RedivePool.psm1
+Import-Module $PSScriptRoot/Save-RedivePool.psm1
 
-$csv = Import-Csv .\manifest\masterdata_assetmanifest -Header Path, md5, Category, Length
+$csv = Import-Csv .\manifest\masterdata_assetmanifest -Header Path, MD5, Category, Length
 $null = New-Item -ItemType Directory "db", "db/csv", "db/lines", "db/json" -Force
 
 foreach ($item in $csv) {
-    $db = $item.md5 + ".sqlite"
+    $db = $item.MD5 + ".sqlite"
     
-    $null = Get-RedivePool -Hash ($item.md5)
-    python $PSScriptRoot/export_db.py $item.md5 $db
+    $null = Save-RedivePool -MD5 ($item.MD5)
+    python $PSScriptRoot/export_db.py $item.MD5 $db
     $tables = sqlite3 $db "SELECT tbl_name FROM sqlite_master WHERE type='table' and tbl_name not like 'sqlite_%'"
     $tables | ForEach-Object {
         Write-Host $_
