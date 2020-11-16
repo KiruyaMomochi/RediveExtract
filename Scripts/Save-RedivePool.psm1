@@ -15,7 +15,7 @@ function Save-RedivePool {
     $HashPre = $MD5.Substring(0, 2)
 
     if ((Test-Path $Path) -and (Get-FileHash $Path -Algorithm MD5).Hash -like $MD5) {
-        return $Path;
+        return;
     }
 
     $dir = Split-Path $Path
@@ -27,7 +27,13 @@ function Save-RedivePool {
     }    
 
     $Private:ProgressPreference = "SilentlyContinue"
-    $null = Invoke-WebRequest -Uri "https://img-pc.so-net.tw/dl/pool/AssetBundles/$HashPre/$MD5" -OutFile $Path
+    try {
+        $null = Invoke-WebRequest -Uri "https://img-pc.so-net.tw/dl/pool/AssetBundles/$HashPre/$MD5" -OutFile $Path
+    }
+    catch  {
+        Write-Host "Error occured when saving ${MD5}:"
+        Write-Host $_ -ForegroundColor Red
+    }
     return $Path
 }
 
