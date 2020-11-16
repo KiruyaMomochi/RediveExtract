@@ -46,10 +46,14 @@ function Save-ManifestItem {
         [Parameter(Mandatory ,ValueFromPipeline)]
         $Item,
         [switch]
-        $Asynchronous = $false
+        $Asynchronous = $false,
+        [Parameter()]
+        [ValidateSet("AssetBundles", "Movie", "Sound")]
+        [string]
+        $Type = "AssetBundles"
     )
     process {
-        Save-RedivePool -MD5 $Item.MD5 -Path $Item.Path
+        Save-RedivePool -MD5 $Item.MD5 -Path $Item.Path -Type $Type
     }
 }
 
