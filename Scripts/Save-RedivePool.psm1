@@ -26,14 +26,16 @@ function Save-RedivePool {
         $null = New-Item -Path $dir -ItemType Directory -Force
     }    
 
-    $Private:ProgressPreference = "SilentlyContinue"
     try {
+        $Private:ProgressPreference = "SilentlyContinue"
         $null = Invoke-WebRequest -Uri "https://img-pc.so-net.tw/dl/pool/AssetBundles/$HashPre/$MD5" -OutFile $Path
     }
     catch  {
-        Write-Host "Error occured when saving ${MD5}:"
+        Write-Host "Error occured when saving ${Path}:"
         Write-Host $_ -ForegroundColor Red
+        return;
     }
+
     return $Path
 }
 
