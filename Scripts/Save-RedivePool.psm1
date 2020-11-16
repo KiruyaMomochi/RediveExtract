@@ -5,7 +5,11 @@ function Save-RedivePool {
         $MD5,
         [Parameter(ValueFromPipelineByPropertyName)]
         [string]
-        $Path = $MD5
+        $Path = $MD5,
+        [Parameter()]
+        [ValidateSet("AssetBundles", "Movie", "Sound")]
+        [string]
+        $Type = "AssetBundles"
     )
 
     $HashPre = $MD5.Substring(0, 2)
