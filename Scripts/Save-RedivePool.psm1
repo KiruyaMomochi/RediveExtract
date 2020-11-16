@@ -28,7 +28,7 @@ function Save-RedivePool {
 
     try {
         $Private:ProgressPreference = "SilentlyContinue"
-        $null = Invoke-WebRequest -Uri "https://img-pc.so-net.tw/dl/pool/AssetBundles/$HashPre/$MD5" -OutFile $Path
+        $null = Invoke-WebRequest -Uri "https://img-pc.so-net.tw/dl/pool/$Type/$HashPre/$MD5" -OutFile $Path
     }
     catch  {
         Write-Host "Error occured when saving ${Path}:"
