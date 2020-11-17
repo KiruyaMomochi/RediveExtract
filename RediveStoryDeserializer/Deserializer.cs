@@ -49,7 +49,8 @@ namespace RediveStoryDeserializer
                 command = new Command
                 {
                     CommandConfig = CommandConfig.List[index],
-                    Args = argList.ToArray()
+                    Args = argList.ToArray(),
+                    Number = index
                 };
             }
             else
@@ -58,7 +59,8 @@ namespace RediveStoryDeserializer
                 command = new Command
                 {
                     CommandConfig = null,
-                    Args = argList.ToArray()
+                    Args = argList.ToArray(),
+                    Number = index
                 };
             }
 

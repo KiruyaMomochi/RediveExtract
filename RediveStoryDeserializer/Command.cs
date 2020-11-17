@@ -17,6 +17,6 @@ namespace RediveStoryDeserializer
         public string[] Args { get; init; }
 
         [YamlIgnore]
-        public CommandNumber? Number => CommandConfig?.Number;
+        public int Number { get; init; }
     }
 }
