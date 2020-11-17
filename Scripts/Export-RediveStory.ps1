@@ -14,17 +14,17 @@ foreach ($item in $storydata) {
     dotnet run --project "$PSScriptRoot/../RediveExtract" --configuration Release -- deserialize --input "$id.bytes" --json "storydata/json/$id.json" --yaml "storydata/yaml/$id.yaml"
 }
 
-$all = Import-Csv .\manifest\storydata_assetmanifest -Header Path, MD5, Category, Length
-$storydata = $all | Where-Object Path -Match 'storydata_\d+.unity3d'
-foreach ($item in $storydata) {
-    $id = [regex]::Match($item.Path, 'storydata_(\d+).unity3d').Groups[1].Value
-    if (Test-Path "storydata/json/${id}.json") {
-        continue
-    }
+# $all = Import-Csv .\manifest\storydata_assetmanifest -Header Path, MD5, Category, Length
+# $storydata = $all | Where-Object Path -Match 'storydata_\d+.unity3d'
+# foreach ($item in $storydata) {
+#     $id = [regex]::Match($item.Path, 'storydata_(\d+).unity3d').Groups[1].Value
+#     if (Test-Path "storydata/json/${id}.json") {
+#         continue
+#     }
 
-    Write-Host $id
+#     Write-Host $id
     
-    $null = Save-RedivePool -MD5 ($item.MD5)
-    python $PSScriptRoot/export_storytext.py $item.MD5 "$id.bytes"
-    dotnet run --project "$PSScriptRoot/../RediveExtract" --configuration Release -- deserialize --input "$id.bytes" --json "storydata/json/$id.json" --yaml "storydata/yaml/$id.yaml"
-}
+#     $null = Save-RedivePool -MD5 ($item.MD5)
+#     python $PSScriptRoot/export_storytext.py $item.MD5 "$id.bytes"
+#     dotnet run --project "$PSScriptRoot/../RediveExtract" --configuration Release -- deserialize --input "$id.bytes" --json "storydata/json/$id.json" --yaml "storydata/yaml/$id.yaml"
+# }
