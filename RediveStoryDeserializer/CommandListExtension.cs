@@ -12,7 +12,7 @@ using YamlDotNet.Serialization.NamingConventions;
 
 namespace RediveStoryDeserializer
 {
-    public static class CommandListExtension
+    public static class commandsExtension
     {
         private static readonly JsonSerializerOptions _options = new JsonSerializerOptions
         {
@@ -31,31 +31,42 @@ namespace RediveStoryDeserializer
 #nullable enable
         private static ISerializer? serializer;
 
-        public static string ToYaml(this IEnumerable<Command> commandList)
+        public static string ToYaml(this IEnumerable<Command> commands)
         {
             serializer ??= new YamlDotNet.Serialization.SerializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
-            return serializer.Serialize(commandList);
+            return serializer.Serialize(commands);
         }
 
-        public static void ToYaml(this IEnumerable<Command> commandList, TextWriter writer)
+        public static void ToYaml(this IEnumerable<Command> commands, TextWriter writer)
         {
             serializer ??= new YamlDotNet.Serialization.SerializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
-            serializer.Serialize(writer, commandList);
+            serializer.Serialize(writer, commands);
         }
 #nullable disable
 
-        public static string ToJson(this IEnumerable<Command> commandList)
+        public static string ToJson(this IEnumerable<Command> commands)
         {
-            return JsonSerializer.Serialize(commandList, _options);
+            return JsonSerializer.Serialize(commands, _options);
         }
 
-        public static byte[] ToUtf8Json(this IEnumerable<Command> commandList)
+        public static byte[] ToUtf8Json(this IEnumerable<Command> commands)
         {
-            return JsonSerializer.SerializeToUtf8Bytes(commandList, _options);
+            return JsonSerializer.SerializeToUtf8Bytes(commands, _options);
+        }
+
+        static private ISerializer _serializer = null;
+        
+        public static string ToReadableYaml(this IEnumerable<Command> commands)
+        {
+            _serializer ??= new SerializerBuilder()
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .Build();
+            var dict = commands.Select(x => x.ToDict()).Where(x => x != null);
+            return _serializer.Serialize(dict);
         }
     }
 }

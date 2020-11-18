@@ -12,9 +12,11 @@ namespace RediveStoryDeserializer
 {
     public class Deserializer
     {
-        static public List<Command> Deserialize(FileInfo f) => Deserialize(f.OpenRead());
+        public static List<Command> Deserialize(FileInfo f) => Deserialize(f.OpenRead());
 
-        static public List<Command> Deserialize(Stream s)
+        public static List<Command> Deserialize(byte[] b) => Deserialize(new MemoryStream(b));
+
+        public static List<Command> Deserialize(Stream s)
         {
             if (!s.CanSeek)
                 throw new NotSupportedException("The stream can't be seeked");
