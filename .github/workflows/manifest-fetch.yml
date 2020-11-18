@@ -89,16 +89,9 @@ jobs:
         repository: "KiruyaMomochi/RediveData"
         path: "./RediveData"
         token: ${{ secrets.REDIVEDATA_ACCESS_TOKEN }}
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
-    - name: Install dependencies
+    - name: Install sqlite
       run: |
-        $choco = choco install sqlite &
-        python -m pip install --upgrade pip
-        python -m pip install UnityPy
-        Wait-Job $choco
+        choco install sqlite
     - name: Run Script
       working-directory: "./RediveData"
       run: |
@@ -140,18 +133,10 @@ jobs:
         repository: "KiruyaMomochi/RediveData"
         path: "./RediveData"
         token: ${{ secrets.REDIVEDATA_ACCESS_TOKEN }}
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
     - name: Setup .NET Core 5.0.x
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.x
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install UnityPy
     - name: Run Script
       working-directory: "./RediveData"
       run: |

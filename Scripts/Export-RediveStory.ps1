@@ -8,10 +8,8 @@ foreach ($item in $storydata) {
     $id = [regex]::Match($item.Path, 'storydata_(\d+).unity3d').Groups[1].Value
 
     Write-Host $id
-    
     $null = Save-RedivePool -MD5 ($item.MD5)
-    python $PSScriptRoot/export_storytext.py $item.MD5 "$id.bytes"
-    dotnet run --project "$PSScriptRoot/../RediveExtract" --configuration Release -- deserialize --input "$id.bytes" --json "storydata/json/$id.json" --yaml "storydata/yaml/$id.yaml"
+    dotnet run --project "$PSScriptRoot/../RediveExtract" --configuration Release -- extract storydata --source $item.MD5 --json "storydata/json/$id.json" --yaml "storydata/yaml/$id.yaml"
 }
 
 # $all = Import-Csv .\manifest\storydata_assetmanifest -Header Path, MD5, Category, Length
