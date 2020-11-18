@@ -24,6 +24,8 @@ jobs:
       story: ${{ steps.pecorine.outputs.story }}
     steps:
     - uses: actions/checkout@v2
+      with:
+        submodules: true
     - name: Checkout RediveData
       uses: actions/checkout@v2
       with:
@@ -83,6 +85,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        submodules: true
     - name: Checkout RediveData
       uses: actions/checkout@v2
       with:
@@ -127,6 +131,8 @@ jobs:
     if: ${{ needs.fetch-manifest.outputs.story }}
     steps:
     - uses: actions/checkout@v2
+      with:
+        submodules: true
     - name: Checkout RediveData
       uses: actions/checkout@v2
       with:
