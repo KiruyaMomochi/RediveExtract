@@ -35,7 +35,7 @@ jobs:
     - name: Run Script
       working-directory: "./RediveData"
       run: |
-        pwsh ../Scripts/Export-RediveDB.ps1 -Program ./RediveExtract/RediveExtract.exe
+        pwsh ../Scripts/Export-RediveDB.ps1 -Program ${{ github.workspace }}/RediveExtract/RediveExtract.exe
     - name: Commit Files
       working-directory: "./RediveData"
       run: |
