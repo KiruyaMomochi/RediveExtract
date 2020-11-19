@@ -10,7 +10,6 @@ defaults:
 jobs:
   fetch-database:
     runs-on: windows-latest
-
     steps:
     - uses: actions/checkout@v2
     - name: Checkout RediveData

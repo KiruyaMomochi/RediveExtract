@@ -12,9 +12,6 @@ defaults:
 jobs:
   fetch-manifest:
     runs-on: windows-latest
-    outputs:
-      db: ${{ steps.kyaru.outputs.db }}
-      story: ${{ steps.pecorine.outputs.story }}
     steps:
     - uses: actions/checkout@v2
     - name: Checkout RediveData
@@ -36,10 +33,26 @@ jobs:
       run: Expand-Archive ./RediveExtract.zip
     - name: Run
       run: ./RediveExtract/RediveExtract.exe --config ./RediveData/config.json --output RediveData
-    - name: Commit Files and Dispatch
+    - name: Commit Files and Prepare Dispatch
+      id: kyaru
       working-directory: "./RediveData"
       run: |
-        $db = (git status './manifest/masterdata_assetmanifest' -s) -or !(Test-Path db)
-        $story = (git status './manifest/storydata_assetmanifest' -s) -or !(Test-Path storydata)
+        if ((git status './manifest/masterdata_assetmanifest' -s) -or !(Test-Path db)) {
+          echo "::set-output name=database::true"
+        }
+        if ((git status './manifest/storydata_assetmanifest' -s) -or !(Test-Path storydata)) {
+          echo "::set-output name=storydata::true"
+        }
         pwsh ../Scripts/Commit-Data.ps1 -Type Manifest
-        
+    - name: Dispatch Database Fetch
+      if: ${{ steps.kyaru.outputs.database }}
+      uses: KiruyaMomochi/workflow-dispatch@v1
+      with:
+        workflow: "database-fetch.yml"
+        token: ${{ secrets.REDIVEDATA_ACCESS_TOKEN }}
+    - name: Dispatch Storydata Fetch
+      if: ${{ steps.kyaru.outputs.storydata }}
+      uses: KiruyaMomochi/workflow-dispatch@v1
+      with:
+        workflow: "storydata-fetch.yml"
+        token: ${{ secrets.REDIVEDATA_ACCESS_TOKEN }}
