@@ -1,8 +1,6 @@
-name: Fetch Latest Manifests
+name: Fetch Latest Storytext
 
 on:
-  schedule:
-    - cron: 0 * * * *
   workflow_dispatch:
 
 defaults:
@@ -10,11 +8,8 @@ defaults:
     shell: pwsh
 
 jobs:
-  fetch-manifest:
+  fetch-storydata:
     runs-on: windows-latest
-    outputs:
-      db: ${{ steps.kyaru.outputs.db }}
-      story: ${{ steps.pecorine.outputs.story }}
     steps:
     - uses: actions/checkout@v2
     - name: Checkout RediveData
@@ -34,12 +29,18 @@ jobs:
         file: RediveExtract.zip
     - name: Extract RediveExtract
       run: Expand-Archive ./RediveExtract.zip
-    - name: Run
-      run: ./RediveExtract/RediveExtract.exe --config ./RediveData/config.json --output RediveData
-    - name: Commit Files and Dispatch
+    - name: Run Script
       working-directory: "./RediveData"
       run: |
-        $db = (git status './manifest/masterdata_assetmanifest' -s) -or !(Test-Path db)
-        $story = (git status './manifest/storydata_assetmanifest' -s) -or !(Test-Path storydata)
-        pwsh ../Scripts/Commit-Data.ps1 -Type Manifest
+        pwsh ../Scripts/Export-RediveStory.ps1 -Program ./RediveExtract/RediveExtract.exe
+    - name: Commit Files
+      working-directory: "./RediveData"
+      run: |
+        pwsh ../Scripts/Commit-Data.ps1 -Type Storytext
+    - name: Upload database
+      uses: actions/upload-artifact@v2
+      with:
+        name: master-database
+        path: |
+          RediveData/*.bytes
         

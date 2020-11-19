@@ -1,3 +1,9 @@
+param (
+    [Parameter(Mandatory)]
+    [string]
+    $Program
+)
+
 Import-Module $PSScriptRoot/Save-RedivePool.psm1
 
 $csv = Import-Csv .\manifest\masterdata_assetmanifest -Header Path, MD5, Category, Length
@@ -7,7 +13,7 @@ foreach ($item in $csv) {
     $db = $item.MD5 + ".sqlite"
     
     $null = Save-RedivePool -MD5 ($item.MD5)
-    dotnet run --project "$PSScriptRoot/../RediveExtract" --configuration Release -- extract database --source $item.MD5 --dest $db
+    & $Program extract database --source $item.MD5 --dest $db
     $tables = sqlite3 $db "SELECT tbl_name FROM sqlite_master WHERE type='table' and tbl_name not like 'sqlite_%'"
     $tables | ForEach-Object {
         Write-Host $_
