@@ -3,6 +3,7 @@ name: Fetch Latest Manifests
 on:
   schedule:
     - cron: 0 * * * *
+  workflow_dispatch:
 
 defaults:
   run:
@@ -10,16 +11,11 @@ defaults:
 
 jobs:
   fetch-manifest:
-
     runs-on: windows-latest
-
     outputs:
       db: ${{ steps.kyaru.outputs.db }}
       story: ${{ steps.pecorine.outputs.story }}
     steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: true
     - name: Checkout RediveData
       uses: actions/checkout@v2
       with:
@@ -30,12 +26,13 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.x
-    - name: Install dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
+    - uses: KiruyaMomochi/download-release@v1
+      with:
+        repo: KiruyaMomochi/RediveExtract
+        file: RediveExtract.zip
+    - run: Expand-Archive RediveExtract.zip
     - name: Run
-      run: dotnet run --project RediveExtract --configuration Release --no-restore --  --config ./RediveData/config.json --output RediveData
+      run: ./RediveExtract/RediveExtract.exe --configuration Release --no-restore -- --config ./RediveData/config.json --output RediveData
     - name: Set output for fetch database
       id: kyaru
       working-directory: "./RediveData"
