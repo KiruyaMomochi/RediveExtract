@@ -33,6 +33,7 @@ jobs:
     - name: Compress Asset
       run: Compress-Archive -Force .\bin\* RediveExtract.zip
     - name: Upload Asset
+      uses: actions/upload-release-asset@v1
       id: upload_asset
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
