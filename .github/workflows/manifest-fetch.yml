@@ -61,18 +61,7 @@ jobs:
     - name: Commit files
       working-directory: "./RediveData"
       run: |
-        if (git status -s)
-        {
-            $json = Get-Content "./config.json" | ConvertFrom-Json
-            $time = [System.TimeZoneInfo]::ConvertTimeBySystemTimeZoneId((Get-Date), 'Taipei Standard Time').ToString("yyyy-MM-dd HH:mm:ss")
-            $message = "Manifest: $($json.Version -join '.')($($json.TruthVersion)) at $time"
-            git status -s
-            git config --global user.name 'KiruyaMomochi'
-            git config --global user.email 'KiruyaMomochi@users.noreply.github.com'
-            git add .
-            git commit -m $message
-            git push
-        }
+        pwsh ../Scripts/Commit-Data.ps1 -Type Manifest
 
   fetch-database:
 
@@ -99,19 +88,7 @@ jobs:
     - name: Commit Files
       working-directory: "./RediveData"
       run: |
-        if (git status -s)
-        {
-            $json = Get-Content "./config.json" | ConvertFrom-Json
-            $time = [System.TimeZoneInfo]::ConvertTimeBySystemTimeZoneId((Get-Date), 'Taipei Standard Time').ToString("yyyy-MM-dd HH:mm:ss")
-            $message = "Database: $($json.Version -join '.')($($json.TruthVersion)) at $time"
-            git status -s
-            git config --global user.name 'KiruyaMomochi'
-            git config --global user.email 'KiruyaMomochi@users.noreply.github.com'
-            git add db/*
-            git pull
-            git commit -m $message
-            git push
-        }
+        pwsh ../Scripts/Commit-Data.ps1 -Type Database
     - name: Upload database
       uses: actions/upload-artifact@v2
       with:
@@ -144,19 +121,7 @@ jobs:
     - name: Commit Files
       working-directory: "./RediveData"
       run: |
-        if (git status -s)
-        {
-            $json = Get-Content "./config.json" | ConvertFrom-Json
-            $time = [System.TimeZoneInfo]::ConvertTimeBySystemTimeZoneId((Get-Date), 'Taipei Standard Time').ToString("yyyy-MM-dd HH:mm:ss")
-            $message = "Storytext: $($json.Version -join '.')($($json.TruthVersion)) at $time"
-            git status -s
-            git config --global user.name 'KiruyaMomochi'
-            git config --global user.email 'KiruyaMomochi@users.noreply.github.com'
-            git add storytext/
-            git pull
-            git commit -m $message
-            git push
-        }
+        pwsh ../Scripts/Commit-Data.ps1 -Type Storytext
     - name: Upload database
       uses: actions/upload-artifact@v2
       with:
