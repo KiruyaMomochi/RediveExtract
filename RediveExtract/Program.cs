@@ -116,7 +116,7 @@ namespace RediveExtract
             if (textAssetObject is TextAsset textAsset)
                 return textAsset.m_Script;
 
-            throw new NotSupportedException("bundle is not AssetBundle");
+            throw new NotSupportedException("bundle is not TextAsset");
         }
 
         private static OrderedDictionary ExtractMonoBehaviour(MonoBehaviour monoBehaviour)
@@ -150,8 +150,8 @@ namespace RediveExtract
             FileInfo lipsync = null)
         {
             var file = LoadAssetFile(source);
-            var text = ExtractTextAsset(file.Objects[0]);
-            var ls = ExtractMonoBehaviour(file.Objects[2]);
+            var text = file.Objects.OfType<TextAsset>().First().m_Script;
+            var ls = file.Objects.OfType<MonoBehaviour>().First().ToType();
             List<RediveStoryDeserializer.Command> commands = null;
             
             if (dest != null)

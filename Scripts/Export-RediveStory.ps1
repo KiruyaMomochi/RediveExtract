@@ -14,7 +14,7 @@ if ($FetchAll) {
     $all = Import-Csv .\manifest\storydata_assetmanifest -Header Path, MD5, Category, Length
     $storydata = $all | Where-Object Path -Match 'storydata_\d+.unity3d'
 } else {
-    $updated = git log -p -1 .\manifest\storydata_assetmanifest | Select-String '^\+(.*)' | % {$_.Matches.Groups[1].Value} | ConvertFrom-Csv -Header Path, MD5, Category, Length
+    $updated = git log -p -1 .\manifest\storydata_assetmanifest | Select-String '^\+(.*)' | ForEach-Object {$_.Matches.Groups[1].Value} | ConvertFrom-Csv -Header Path, MD5, Category, Length
     $storydata = $updated | Where-Object Path -Match 'storydata_\d+.unity3d'
 }
 
