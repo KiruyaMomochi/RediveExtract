@@ -23,7 +23,8 @@ if (git status -s)
         git add db/
     }
     if ($Type -eq "Storytext") {
-        git add storytext/ storydata/
+        git add storytext/
+        git add storydata/
     }
     
     git commit -m $message
