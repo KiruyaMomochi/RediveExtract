@@ -38,10 +38,4 @@ jobs:
       working-directory: "./RediveData"
       run: |
         pwsh ../Scripts/Commit-Data.ps1 -Type Storytext
-    - name: Upload database
-      uses: actions/upload-artifact@v2
-      with:
-        name: master-database
-        path: |
-          RediveData/*.bytes
         
