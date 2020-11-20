@@ -10,13 +10,12 @@ Import-Module $PSScriptRoot/Save-RedivePool.psm1
 
 $null = New-Item -ItemType Directory "storydata", "storydata/yaml", "storydata/json" -Force
 
-Write-Host (git log -p -1 .\manifest\storydata_assetmanifest | Select-String '^\+(.*)' | ForEach-Object {$_.Matches.Groups[1].Value} | ConvertFrom-Csv -Header Path, MD5, Category, Length)
-
 if ($FetchAll) {
     $all = Import-Csv .\manifest\storydata_assetmanifest -Header Path, MD5, Category, Length
     $storydata = $all | Where-Object Path -Match 'storydata_\d+.unity3d'
 } else {
     $updated = git log -p -1 .\manifest\storydata_assetmanifest | Select-String '^\+(.*)' | ForEach-Object {$_.Matches.Groups[1].Value} | ConvertFrom-Csv -Header Path, MD5, Category, Length
+    Write-Host $updated
     $storydata = $updated | Where-Object Path -Match 'storydata_\d+.unity3d'
 }
 
