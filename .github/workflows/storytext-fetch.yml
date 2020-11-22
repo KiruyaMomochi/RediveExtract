@@ -37,5 +37,6 @@ jobs:
     - name: Commit Files
       working-directory: "./RediveData"
       run: |
+        git pull
         pwsh ../Scripts/Commit-Data.ps1 -Type Storytext
         
