@@ -12,9 +12,9 @@ using YamlDotNet.Serialization.NamingConventions;
 
 namespace RediveStoryDeserializer
 {
-    public static class commandsExtension
+    public static class CommandsExtension
     {
-        private static readonly JsonSerializerOptions _options = new JsonSerializerOptions
+        private static readonly JsonSerializerOptions Options = new()
         {
             WriteIndented = true,
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -29,33 +29,32 @@ namespace RediveStoryDeserializer
         };
 
 #nullable enable
-        private static ISerializer? serializer;
 
         public static string ToYaml(this IEnumerable<Command> commands)
         {
-            serializer ??= new YamlDotNet.Serialization.SerializerBuilder()
+            _serializer ??= new YamlDotNet.Serialization.SerializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
-            return serializer.Serialize(commands);
+            return _serializer.Serialize(commands);
         }
 
         public static void ToYaml(this IEnumerable<Command> commands, TextWriter writer)
         {
-            serializer ??= new YamlDotNet.Serialization.SerializerBuilder()
+            _serializer ??= new YamlDotNet.Serialization.SerializerBuilder()
                 .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .Build();
-            serializer.Serialize(writer, commands);
+            _serializer.Serialize(writer, commands);
         }
 #nullable disable
 
         public static string ToJson(this IEnumerable<Command> commands)
         {
-            return JsonSerializer.Serialize(commands, _options);
+            return JsonSerializer.Serialize(commands, Options);
         }
 
         public static byte[] ToUtf8Json(this IEnumerable<Command> commands)
         {
-            return JsonSerializer.SerializeToUtf8Bytes(commands, _options);
+            return JsonSerializer.SerializeToUtf8Bytes(commands, Options);
         }
 
         static private ISerializer _serializer = null;
