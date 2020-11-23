@@ -6,7 +6,9 @@ using System.CommandLine.Invocation;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Unicode;
 using System.Threading.Tasks;
 using AssetStudio;
 using RediveStoryDeserializer;
@@ -66,6 +68,16 @@ namespace RediveExtract
                 CommandHandler.Create<FileInfo, FileInfo, FileInfo, FileInfo, FileInfo>(ExtractStoryData);
             extract.Add(storydata);
 
+            var constText = new Command("consttext")
+            {
+                new Option<FileInfo>("--source"),
+                new Option<FileInfo>("--json"),
+                new Option<FileInfo>("--yaml")
+            };
+            constText.Handler =
+                CommandHandler.Create<FileInfo, FileInfo, FileInfo>(ExtractConstText);
+            extract.Add(constText);
+            
             rootCommand.Add(deserialize);
             rootCommand.Add(extract);
 
@@ -180,15 +192,45 @@ namespace RediveExtract
                 JsonSerializer.SerializeAsync(fs, ls).Wait();
             }
         }
-
-        private static void Deserialize(FileInfo input = null, FileInfo json = null, FileInfo yaml = null)
+        
+        private static readonly JsonSerializerOptions Options = new()
         {
-            if (input == null)
+            WriteIndented = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            Encoder = JavaScriptEncoder.Create
+            (
+                UnicodeRanges.BasicLatin,
+                UnicodeRanges.CjkUnifiedIdeographs,
+                UnicodeRanges.CjkSymbolsandPunctuation,
+                UnicodeRanges.Katakana,
+                UnicodeRanges.HalfwidthandFullwidthForms
+            )
+        };
+
+        private static void ExtractConstText(FileInfo source, FileInfo json = null, FileInfo yaml = null)
+        {
+            var file = LoadAssetFile(source);
+            var ls = file.Objects.OfType<MonoBehaviour>().First().ToType();
+            var data = ls["dataArray"] ?? new object();
+
+            if (json != null)
             {
-                Console.WriteLine("input?");
-                return;
+                using var fs = json.Create();
+                JsonSerializer.SerializeAsync(fs, data, Options).Wait();
             }
 
+            if (yaml != null)
+            {
+                using var fy = yaml.CreateText();
+                new SerializerBuilder()
+                    .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                    .Build()
+                    .Serialize(fy, data);
+            }
+        }
+
+        private static void Deserialize(FileInfo input, FileInfo json = null, FileInfo yaml = null)
+        {
             if (json == null && yaml == null)
             {
                 return;
