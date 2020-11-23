@@ -1,0 +1,41 @@
+name: Fetch Latest ConstText
+
+on:
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: pwsh
+
+jobs:
+  fetch-storydata:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Checkout RediveData
+      uses: actions/checkout@v2
+      with:
+        repository: "KiruyaMomochi/RediveData"
+        path: "./RediveData"
+        token: ${{ secrets.REDIVEDATA_ACCESS_TOKEN }}
+        fetch-depth: 3
+    - name: Setup .NET Core 5.0.x
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+    - name: Download RediveExtract
+      uses: KiruyaMomochi/download-release@v1
+      with:
+        repo: KiruyaMomochi/RediveExtract
+        file: RediveExtract.zip
+    - name: Extract RediveExtract
+      run: Expand-Archive ./RediveExtract.zip
+    - name: Run Script
+      working-directory: "./RediveData"
+      run: |
+        pwsh ../Scripts/Export-RediveConst.ps1 -Program ${{ github.workspace }}/RediveExtract/RediveExtract.exe
+    - name: Commit Files
+      working-directory: "./RediveData"
+      run: |
+        git pull
+        pwsh ../Scripts/Commit-Data.ps1 -Type ConstText

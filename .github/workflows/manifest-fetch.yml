@@ -37,13 +37,16 @@ jobs:
       id: kyaru
       working-directory: "./RediveData"
       run: |
+        pwsh ../Scripts/Commit-Data.ps1 -Type Manifest
         if ((git status './manifest/masterdata_assetmanifest' -s) -or !(Test-Path db)) {
           echo "::set-output name=database::true"
         }
         if ((git status './manifest/storydata_assetmanifest' -s) -or !(Test-Path storydata)) {
           echo "::set-output name=storydata::true"
         }
-        pwsh ../Scripts/Commit-Data.ps1 -Type Manifest
+        if ((git status './manifest/consttext_assetmanifest' -s) -or !(Test-Path consttext)) {
+          echo "::set-output name=consttext::true"
+        }
     - name: Dispatch Database Fetch
       if: ${{ steps.kyaru.outputs.database }}
       uses: KiruyaMomochi/workflow-dispatch@v1
@@ -55,4 +58,10 @@ jobs:
       uses: KiruyaMomochi/workflow-dispatch@v1
       with:
         workflow: "storydata-fetch.yml"
+        token: ${{ secrets.REDIVEDATA_ACCESS_TOKEN }}
+    - name: Dispatch ConstText Fetch
+      if: ${{ steps.kyaru.outputs.consttext }}
+      uses: KiruyaMomochi/workflow-dispatch@v1
+      with:
+        workflow: "consttext-fetch.yml"
         token: ${{ secrets.REDIVEDATA_ACCESS_TOKEN }}

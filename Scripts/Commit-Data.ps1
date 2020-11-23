@@ -2,7 +2,7 @@
 param (
     [Parameter(Mandatory)]
     [string]
-    [ValidateSet("Manifest", "Database", "Storytext")]
+    [ValidateSet("Manifest", "Database", "Storytext", "ConstText")]
     $Type
 )
 
@@ -25,6 +25,9 @@ if (git status -s)
     if ($Type -eq "Storytext") {
         git add storytext/
         git add storydata/
+    }
+    if ($Type -eq "ConstText") {
+        git add consttext/
     }
     
     git commit -m $message
