@@ -9,6 +9,22 @@ namespace RediveExtract
 {
     static partial class Program
     {
+        /// <summary>
+        /// Get manifest files
+        /// </summary>
+        /// <param name="config">An option whose argument is parsed as a FileInfo. The default value is config.json</param>
+        /// <param name="output">The output path</param> 
+        private static void GetManifest(FileInfo config = null, string output = ".")
+        {
+            _configFile = config ?? new FileInfo("config.json");
+
+            Directory.CreateDirectory(output);
+            Directory.SetCurrentDirectory(output);
+
+            Init().Wait();
+            SaveAllManifests().Wait();
+        }
+
         private static async Task SaveAllManifests()
         {
             Directory.CreateDirectory("manifest");
@@ -115,7 +131,7 @@ namespace RediveExtract
             }
             catch (HttpRequestException)
             {
-                _config.TruthVersion = _config.TruthVersion - 1000;
+                _config.TruthVersion -= 1000;
                 if (_config.TruthVersion < oldVersion)
                     _config.TruthVersion = oldVersion;
             }
@@ -130,7 +146,7 @@ namespace RediveExtract
             }
             catch (HttpRequestException)
             {
-                _config.TruthVersion = _config.TruthVersion - 10;
+                _config.TruthVersion -= 10;
                 if (_config.TruthVersion < oldVersion)
                     _config.TruthVersion = oldVersion;
             }
@@ -174,7 +190,7 @@ namespace RediveExtract
             {
                 using var md5 = MD5.Create();
                 await using var stream = File.OpenRead(writePath);
-                var realSum = BitConverter.ToString(md5.ComputeHash(stream)).Replace("-", "");
+                var realSum = BitConverter.ToString(await md5.ComputeHashAsync(stream)).Replace("-", "");
                 if (string.Equals(realSum, md5Sum, StringComparison.InvariantCultureIgnoreCase))
                 {
                     return;

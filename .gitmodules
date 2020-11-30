@@ -7,6 +7,3 @@
 [submodule "UsmDemuxer"]
 	path = UsmDemuxer
 	url = https://github.com/KiruyaMomochi/UsmDemuxerCore
-[submodule "HcaConverter"]
-	path = HcaConverter
-	url = https://github.com/KiruyaMomochi/HcaConverterCore
