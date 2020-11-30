@@ -1,9 +1,6 @@
 [submodule "AssetStudioCore"]
 	path = AssetStudioCore
 	url = https://github.com/KiruyaMomochi/AssetStudioCore
-[submodule "VGMToolbox"]
-	path = VGMToolbox
-	url = https://github.com/KiruyaMomochi/VGMToolbox/
 [submodule "UsmDemuxer"]
 	path = UsmDemuxer
 	url = https://github.com/KiruyaMomochi/UsmDemuxerCore
