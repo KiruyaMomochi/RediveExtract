@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using RediveMediaExtractor;
@@ -101,27 +102,34 @@ namespace RediveExtract
 
             var bins = Video.ExtractUsm(source);
             var taskList = new List<Task>();
+            // ReSharper disable once InconsistentNaming
+            var m2vs = new List<string>();
+            // ReSharper disable once IdentifierTypo
+            var wavs = new List<string>();
 
             foreach (var bin in bins)
             {
                 var noExt = Path.GetFileNameWithoutExtension(Path.GetFileName(bin));
                 if (noExt == null)
                     throw new FileNotFoundException();
+                var wavPath = Path.Combine(dest.FullName, noExt + ".wav");
 
                 switch (Path.GetExtension(bin))
                 {
                     case ".bin" or ".hca":
+                        wavs.Add(wavPath);
                         taskList.Add(Task.Run(() =>
-                            Audio.HcaToWav(bin, Path.Combine(dest.FullName, noExt + ".wav"))
+                            Audio.HcaToWav(bin, wavPath)
                         ));
                         break;
                     case ".adx":
+                        wavs.Add(wavPath);
                         taskList.Add(Task.Run(() =>
-                            Audio.AdxToWav(bin, Path.Combine(dest.FullName, noExt + ".wav"))
+                            Audio.AdxToWav(bin, wavPath)
                         ));
                         break;
                     case ".m2v":
-                        taskList.Add(Video.M2VToMp4(bin, Path.Combine(dest.FullName, noExt + ".mp4")));
+                        m2vs.Add(bin);
                         break;
                     default:
                         throw new NotSupportedException(bin);
@@ -129,13 +137,18 @@ namespace RediveExtract
             }
 
             await Task.WhenAll(taskList);
-            GC.Collect(); 
-            GC.WaitForPendingFinalizers(); 
-            
-            foreach (var bin in bins)
-            {
-                File.Delete(bin);
-            }
+
+            Tasks.Clear();
+            // ReSharper disable once InconsistentNaming
+            taskList.AddRange(from m2v in m2vs
+                let mp4 = Path.ChangeExtension(source.Name, "mp4")
+                select Video.M2VToMp4(m2v, wavs, Path.Combine(dest.FullName, mp4)));
+            await Task.WhenAll(taskList);
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+
+            foreach (var bin in bins) File.Delete(bin);
         }
 
         private static async Task Init()
