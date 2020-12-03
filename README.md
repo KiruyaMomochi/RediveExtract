@@ -9,3 +9,4 @@ Fetch and extract 超異域公主連結☆Re：Dive resources automaticly using 
 - [esterTion/unity-texture-toolkit](https://github.com/esterTion/unity-texture-toolkit)
 - [Perfare/AssetStudio](https://github.com/Perfare/AssetStudio)
 - [vgmtoolbox](https://sourceforge.net/p/vgmtoolbox)
+- [OpenCGSS/DereTore](https://github.com/OpenCGSS/DereTore/)
