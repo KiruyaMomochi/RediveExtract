@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UsmUtils", "UsmDemuxer\UsmU
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UsmFormat", "UsmDemuxer\UsmFormat\UsmFormat.csproj", "{4B9FF3D1-6546-43FE-8F90-CD204798664F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RediveUtils", "RediveUtils\RediveUtils.csproj", "{9D4B454E-8B6C-402F-ACC5-27647F17D98B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,6 +73,14 @@ Global
 		{4B9FF3D1-6546-43FE-8F90-CD204798664F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4B9FF3D1-6546-43FE-8F90-CD204798664F}.Release|x86.ActiveCfg = Release|Any CPU
 		{4B9FF3D1-6546-43FE-8F90-CD204798664F}.Release|x86.Build.0 = Release|Any CPU
+		{9D4B454E-8B6C-402F-ACC5-27647F17D98B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D4B454E-8B6C-402F-ACC5-27647F17D98B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D4B454E-8B6C-402F-ACC5-27647F17D98B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9D4B454E-8B6C-402F-ACC5-27647F17D98B}.Debug|x86.Build.0 = Debug|Any CPU
+		{9D4B454E-8B6C-402F-ACC5-27647F17D98B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D4B454E-8B6C-402F-ACC5-27647F17D98B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D4B454E-8B6C-402F-ACC5-27647F17D98B}.Release|x86.ActiveCfg = Release|Any CPU
+		{9D4B454E-8B6C-402F-ACC5-27647F17D98B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

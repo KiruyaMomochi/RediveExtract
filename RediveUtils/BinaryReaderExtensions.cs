@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RediveUtils;
 
 namespace RediveStoryDeserializer
 {
-    static class BinaryReaderExtensions
+    public static class BinaryReaderExtensions
     {
         public static string ReadRedive(this BinaryReader br)
         {

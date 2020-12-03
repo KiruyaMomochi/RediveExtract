@@ -9,4 +9,8 @@
     <PackageReference Include="YamlDotNet" Version="8.1.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\RediveUtils\RediveUtils.csproj" />
+  </ItemGroup>
+
 </Project>

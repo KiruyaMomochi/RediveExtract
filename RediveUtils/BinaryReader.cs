@@ -1,15 +1,10 @@
-﻿using System;
-using System.Buffers.Binary;
-using System.Buffers.Text;
-using System.Collections.Generic;
+﻿using System.Buffers.Binary;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace RediveStoryDeserializer
+namespace RediveUtils
 {
-    class BinaryReader : System.IO.BinaryReader
+    public class BinaryReader : System.IO.BinaryReader
     {
         public BinaryReader(Stream input) : this(input, Encoding.UTF8, false)
         {
