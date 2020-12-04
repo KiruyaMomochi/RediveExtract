@@ -10,8 +10,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CriDemuxer\CriFormat\CriFormat.csproj" />
     <ProjectReference Include="..\RediveUtils\RediveUtils.csproj" />
-    <ProjectReference Include="..\UsmDemuxer\UsmFormat\UsmFormat.csproj" />
   </ItemGroup>
 
 </Project>

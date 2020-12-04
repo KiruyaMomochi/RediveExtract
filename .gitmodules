@@ -1,6 +1,6 @@
 [submodule "AssetStudioCore"]
 	path = AssetStudioCore
 	url = https://github.com/KiruyaMomochi/AssetStudioCore
-[submodule "UsmDemuxer"]
-	path = UsmDemuxer
-	url = https://github.com/KiruyaMomochi/UsmDemuxerCore
+[submodule "CriDemuxer"]
+	path = CriDemuxer
+	url = https://github.com/KiruyaMomochi/CriDemuxerCore
