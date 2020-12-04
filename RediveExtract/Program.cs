@@ -88,6 +88,15 @@ namespace RediveExtract
                 CommandHandler.Create<FileInfo, FileInfo>(Audio.AdxToWav);
             extract.Add(adx);
 
+            var acb = new Command("acb")
+            {
+                new Option<FileInfo>("--source"),
+                new Option<DirectoryInfo>("--dest"),
+            };
+            acb.Handler =
+                CommandHandler.Create<FileInfo, DirectoryInfo>(Audio.AcbToWavs);
+            extract.Add(acb);
+
             rootCommand.Add(extract);
             rootCommand.InvokeAsync(args).Wait();
         }
@@ -147,7 +156,6 @@ namespace RediveExtract
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
-
             foreach (var bin in bins) File.Delete(bin);
         }
 

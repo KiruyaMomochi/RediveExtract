@@ -4,3 +4,6 @@
 [submodule "CriDemuxer"]
 	path = CriDemuxer
 	url = https://github.com/KiruyaMomochi/CriDemuxerCore
+[submodule "HcaConverter"]
+	path = HcaConverter
+	url = https://github.com/KiruyaMomochi/HcaConverterCore
