@@ -128,6 +128,8 @@ namespace RediveExtract
                 var saveDir = Path.GetDirectoryName(savePath);
                 Directory.CreateDirectory(saveDir ?? throw new InvalidOperationException());
                 
+                Console.WriteLine(internalPath);
+
                 switch (file)
                 {
                     case Texture2D texture2D:
