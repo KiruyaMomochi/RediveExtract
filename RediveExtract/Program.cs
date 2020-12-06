@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using AssetStudio;
 using RediveMediaExtractor;
 
 // ReSharper disable StringLiteralTypo
@@ -97,8 +98,54 @@ namespace RediveExtract
                 CommandHandler.Create<FileInfo, DirectoryInfo>(Audio.AcbToWavs);
             extract.Add(acb);
 
+            var u3d = new Command("unity3d")
+            {
+                new Option<FileInfo>("--source"),
+                new Option<DirectoryInfo>("--dest")
+            };
+            u3d.Handler =
+                CommandHandler.Create<FileInfo, DirectoryInfo>(ExtractUnity3d);
+            extract.Add(u3d);
+
             rootCommand.Add(extract);
             rootCommand.InvokeAsync(args).Wait();
+        }
+
+        private static void ExtractUnity3d(FileInfo source, DirectoryInfo dest)
+        {
+            var am = new AssetsManager();
+            am.LoadFiles(source.FullName);
+            var dic = am.assetsFileList[0].ObjectsDic;
+            if (dic[1] is not AssetBundle assetBundle) 
+                return;
+            
+            var container = assetBundle.m_Container;
+            foreach (var (internalPath, value) in container)
+            {
+                var id = value.asset.m_PathID;
+                var file = dic[id];
+                var savePath = Path.Combine(dest.FullName, internalPath);
+                var saveDir = Path.GetDirectoryName(savePath);
+                Directory.CreateDirectory(saveDir ?? throw new InvalidOperationException());
+                
+                switch (file)
+                {
+                    case Texture2D texture2D:
+                    {
+                        var bitmap = texture2D.ConvertToBitmap(true);
+                        bitmap.Save(savePath);
+                        break;
+                    }
+                    case TextAsset textAsset:
+                    {
+                        using var tf = File.OpenWrite(savePath);
+                        tf.Write(textAsset.m_Script);
+                        break;
+                    }
+                    
+                }
+                
+            }
         }
 
         private static async Task ExtractUsmFinal(FileInfo source, DirectoryInfo dest)

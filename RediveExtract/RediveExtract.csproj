@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AssetStudioCore\AssetStudioCore\AssetStudioCore.csproj" />
+    <ProjectReference Include="..\AssetStudioCore\AssetStudioUtility\AssetStudioUtility.csproj" />
     <ProjectReference Include="..\RediveStoryDeserializer\RediveStoryDeserializer.csproj" />
     <ProjectReference Include="..\RediveVideoExtractor\RediveMediaExtractor.csproj" />
   </ItemGroup>
