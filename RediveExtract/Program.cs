@@ -123,35 +123,42 @@ namespace RediveExtract
             var container = assetBundle.m_Container;
             foreach (var (internalPath, value) in container)
             {
-                var id = value.asset.m_PathID;
-                var file = dic[id];
-                var savePath = Path.Combine(dest.FullName, internalPath ?? "unknown");
-                var saveDir = Path.GetDirectoryName(savePath) ?? throw new InvalidOperationException();
-                Directory.CreateDirectory(saveDir);
-                
-                Console.WriteLine(internalPath);
-
-                switch (file)
+                try
                 {
-                    case Texture2D texture2D:
+
+                    var id = value.asset.m_PathID;
+                    var file = dic[id];
+                    var savePath = Path.Combine(dest.FullName, internalPath ?? "unknown");
+                    var saveDir = Path.GetDirectoryName(savePath) ?? throw new InvalidOperationException();
+                    Directory.CreateDirectory(saveDir);
+
+                    switch (file)
                     {
-                        var bitmap = texture2D.ConvertToBitmap(true);
-                        bitmap.Save(savePath);
-                        break;
+                        case Texture2D texture2D:
+                        {
+                            var bitmap = texture2D.ConvertToBitmap(true);
+                            bitmap.Save(savePath);
+                            break;
+                        }
+                        case TextAsset textAsset:
+                        {
+                            using var f = File.OpenWrite(savePath);
+                            f.Write(textAsset.m_Script);
+                            break;
+                        }
+                        case MonoBehaviour monoBehaviour:
+                        {
+                            using var f = File.OpenWrite(savePath);
+                            monoBehaviour.ToType();
+                            JsonSerializer.SerializeAsync(f, monoBehaviour.ToType(), Options).Wait();
+                            break;
+                        }
                     }
-                    case TextAsset textAsset:
-                    {
-                        using var f = File.OpenWrite(savePath);
-                        f.Write(textAsset.m_Script);
-                        break;
-                    }
-                    case MonoBehaviour monoBehaviour:
-                    {
-                        using var f = File.OpenWrite(savePath);
-                        monoBehaviour.ToType();
-                        JsonSerializer.SerializeAsync(f, monoBehaviour.ToType(), Options).Wait();
-                        break;
-                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Exception {e} occurs when processing");
+                    Console.WriteLine($"{internalPath} in {source.FullName}");
                 }
             }
         }
