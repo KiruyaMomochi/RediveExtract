@@ -5,6 +5,7 @@ using System.CommandLine.Invocation;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using AssetStudio;
 using RediveMediaExtractor;
@@ -124,9 +125,9 @@ namespace RediveExtract
             {
                 var id = value.asset.m_PathID;
                 var file = dic[id];
-                var savePath = Path.Combine(dest.FullName, internalPath);
-                var saveDir = Path.GetDirectoryName(savePath);
-                Directory.CreateDirectory(saveDir ?? throw new InvalidOperationException());
+                var savePath = Path.Combine(dest.FullName, internalPath ?? "unknown");
+                var saveDir = Path.GetDirectoryName(savePath) ?? throw new InvalidOperationException();
+                Directory.CreateDirectory(saveDir);
                 
                 Console.WriteLine(internalPath);
 
@@ -140,13 +141,18 @@ namespace RediveExtract
                     }
                     case TextAsset textAsset:
                     {
-                        using var tf = File.OpenWrite(savePath);
-                        tf.Write(textAsset.m_Script);
+                        using var f = File.OpenWrite(savePath);
+                        f.Write(textAsset.m_Script);
                         break;
                     }
-                    
+                    case MonoBehaviour monoBehaviour:
+                    {
+                        using var f = File.OpenWrite(savePath);
+                        monoBehaviour.ToType();
+                        JsonSerializer.SerializeAsync(f, monoBehaviour.ToType(), Options).Wait();
+                        break;
+                    }
                 }
-                
             }
         }
 
