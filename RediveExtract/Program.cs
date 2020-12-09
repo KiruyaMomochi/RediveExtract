@@ -130,7 +130,7 @@ namespace RediveExtract
             am.LoadFiles(source.FullName);
             var srt = am.assetsFileList[0].Objects.OfType<MonoBehaviour>().First();
 
-            using var df = dest.CreateText();
+            using var df = new StreamWriter(dest.OpenWrite());
             df.WriteLine($"WEBVTT - {srt.m_Name}\n");
             
             if (srt.ToType()["recordList"] is not IEnumerable<object> records)
@@ -141,7 +141,7 @@ namespace RediveExtract
             foreach (OrderedDictionary rec in records)
             {
                 df.WriteLine($"{ConvertTime(rec["startTime"])} --> {ConvertTime(rec["endTime"])}");
-                df.WriteLine($"- {rec["text"]}");
+                df.WriteLine(rec["text"]);
                 df.WriteLine();
             }
 
