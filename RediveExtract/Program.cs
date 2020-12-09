@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
@@ -108,9 +110,57 @@ namespace RediveExtract
                 CommandHandler.Create<FileInfo, DirectoryInfo>(ExtractUnity3d);
             extract.Add(u3d);
 
+            // TODO: do extract vtt according to MonoBehaviour
+            var vtt = new Command("vtt")
+            {
+                new Option<FileInfo>("--source"),
+                new Option<FileInfo>("--dest")
+            };
+            vtt.Handler =
+                CommandHandler.Create<FileInfo, FileInfo>(ExtractVtt);
+            extract.Add(vtt);
+
             rootCommand.Add(extract);
             rootCommand.InvokeAsync(args).Wait();
         }
+
+        private static void ExtractVtt(FileInfo source, FileInfo dest)
+        {
+            var am = new AssetsManager();
+            am.LoadFiles(source.FullName);
+            var srt = am.assetsFileList[0].Objects.OfType<MonoBehaviour>().First();
+
+            using var df = dest.CreateText();
+            df.WriteLine($"WEBVTT - {srt.m_Name}\n");
+            
+            if (srt.ToType()["recordList"] is not IEnumerable<object> records)
+            {
+                throw new TypeLoadException();
+            }
+
+            foreach (OrderedDictionary rec in records)
+            {
+                df.WriteLine($"{ConvertTime(rec["startTime"])} --> {ConvertTime(rec["endTime"])}");
+                df.WriteLine($"- {rec["text"]}");
+                df.WriteLine();
+            }
+
+            static string ConvertTime(object obj)
+            {
+                if (obj is not float time)
+                {
+                    throw new ArgumentException(null, nameof(obj));
+                }
+                
+                var seconds = (long) time;
+                var ms = (long) ((time - seconds) * 1000);
+                var hr = seconds / 3600;
+                var mi = seconds % 3600 / 60;
+                var se = seconds % 60;
+                return $"{hr:D2}:{mi:D2}:{se:D2}.{ms:D3}";
+            }
+        }
+        
 
         private static void ExtractUnity3d(FileInfo source, DirectoryInfo dest)
         {
