@@ -113,6 +113,7 @@ namespace RediveStoryDeserializer
         BackgroundBlur = 107,
         SeasonalReward = 108,
         MiniGame = 109,
-        Max = 110
+        DialogAnimation = 110,
+        Max = 111
     }
 }

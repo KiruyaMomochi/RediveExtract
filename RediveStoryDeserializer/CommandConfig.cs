@@ -1,5 +1,3 @@
-using System;
-
 namespace RediveStoryDeserializer
 {
     public record CommandConfig
@@ -746,6 +744,40 @@ namespace RediveStoryDeserializer
                 ClassName = "StoryCommandTouchToStart",
                 CommandCategory = CommandCategory.System,
                 ArgCount = (0, 0)
+            },
+            new CommandConfig
+            {
+                Number = CommandNumber.EventAdvMoveHorizontal
+            },
+            new CommandConfig
+            {
+                Number = CommandNumber.BgPanX,
+                Name = "background_pan_x",
+                ClassName = "StoryCommandBackgroundPanX"
+            },
+            new CommandConfig()
+            {
+                Number = CommandNumber.BackgroundBlur,
+                Name = "background_blur",
+                ClassName = "StoryCommandBackgroundBlur"
+            },
+            new CommandConfig()
+            {
+                Number = CommandNumber.SeasonalReward,
+                Name = "seasonal_reward",
+                ClassName = "StoryCommandSeasonalReward"
+            },
+            new CommandConfig()
+            {
+                Number = CommandNumber.MiniGame,
+                Name = "mini_game",
+                ClassName = "StoryCommandMiniGame"
+            },
+            new CommandConfig()
+            {
+                Number = CommandNumber.DialogAnimation,
+                Name = "dialog_animation",
+                ClassName = "StoryCommandDialogAnimation"
             }
         };
     }
