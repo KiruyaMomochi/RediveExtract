@@ -7,16 +7,16 @@ using RediveStoryDeserializer;
 
 namespace RediveExtract
 {
-    static partial class Program
+    public static class Story
     {
-        private static void ExtractStoryData(FileInfo source, FileInfo json = null, FileInfo yaml = null,
+        public static void ExtractStoryData(FileInfo source, FileInfo json = null, FileInfo yaml = null,
             FileInfo dest = null,
             FileInfo lipsync = null)
         {
-            var file = LoadAssetFile(source);
+            var file = Unity3d.LoadAssetFile(source);
             var text = file.Objects.OfType<TextAsset>().First().m_Script;
             var ls = file.Objects.OfType<MonoBehaviour>().First().ToType();
-            List<RediveStoryDeserializer.Command> commands = null;
+            List<Command> commands = null;
 
             if (dest != null)
             {

@@ -1,190 +1,71 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
+using System.Text.Json;
 using System.Threading.Tasks;
+
 // ReSharper disable StringLiteralTypo
 
 namespace RediveExtract
 {
-    static partial class Program
+    public class Manifest
     {
-        /// <summary>
-        /// Get manifest files
-        /// </summary>
-        /// <param name="config">An option whose argument is parsed as a FileInfo. The default value is config.json</param>
-        /// <param name="output">The output path</param> 
-        private static void GetManifest(FileInfo config = null, string output = ".")
+        private readonly Config _config;
+        private readonly HttpClient _client;
+        private readonly string _dest;
+        private const string ImgServer = "https://img-pc.so-net.tw";
+
+        public Manifest(FileInfo configFile, string dest)
         {
-            _configFile = config ?? new FileInfo("config.json");
+            _dest = dest;
+            Directory.CreateDirectory(dest);
 
-            Directory.CreateDirectory(output);
-            Directory.SetCurrentDirectory(output);
+            try
+            {
+                using var fs = configFile.OpenText();
+                _config = JsonSerializer.Deserialize<Config>(fs.ReadToEnd());
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("config.json not found or not work.");
+                throw;
+            }
 
-            Init().Wait();
-            SaveAllManifests().Wait();
+            _client = new HttpClient
+            {
+                BaseAddress = new Uri(ImgServer)
+            };
         }
 
-        private static async Task SaveAllManifests()
+        public async Task SaveAllManifests()
         {
-            Directory.CreateDirectory("manifest");
-            
             var manifests = await SaveLatestAssetManifest();
-
-            Tasks.Add(SaveLatestBundleManifest());
-            Tasks.Add(SaveMovieManifest());
-            Tasks.Add(SaveLowMovieManifest());
-            Tasks.Add(SaveSoundManifest());
-
-            foreach (var assetManifest in ManifestItem.ParseAll(manifests))
-                Tasks.Add(UpdateManifest(
-                    _config.ManifestPath + assetManifest.Uri,
-                    assetManifest.Uri,
-                    assetManifest.Md5));
-
-            Task.WaitAll(Tasks.ToArray());
-            Tasks.Clear();
-            await SaveConfig();
-        }
-        
-        private static Task<string> SaveAssetManifest() => SaveManifest(
-            _config.ManifestPath + "manifest/manifest_assetmanifest",
-             "manifest/manifest_assetmanifest");
-
-        private static Task<string> SaveBundleManifest() => SaveManifest(
-            _config.BundlesPath + "manifest/bdl_assetmanifest",
-            "manifest/bdl_assetmanifest");
-
-        private static Task<string> SaveMovieManifest() => SaveManifest(
-            _config.MoviePath + "manifest/moviemanifest",
-            "manifest/moviemanifest");
-        
-        private static Task<string> SaveLowMovieManifest() => SaveManifest(
-            _config.LowMoviePath + "manifest/moviemanifest",
-            "manifest/low_moviemanifest");
-
-        private static Task<string> SaveSoundManifest() => SaveManifest(
-            _config.SoundPath + "manifest/sound2manifest",
-            "manifest/sound2manifest");
-
-        private static async Task<string> SaveLatestBundleManifest()
-        {
-            var manifest = await SaveBundleManifest();
-
-            try
+            var tasks = new List<Task>
             {
-                while (true)
-                {
-                    _config.Version[0]++;
-                    await SaveBundleManifest();
-                    _config.Version[1] = _config.Version[2] = 0;
-                }
-            }
-            catch (HttpRequestException)
-            {
-                _config.Version[0]--;
-            }
+                SaveLatestBundleManifest(), SaveMovieManifest(), SaveLowMovieManifest(), SaveSoundManifest()
+            };
 
-            try
-            {
-                while (true)
-                {
-                    _config.Version[1]++;
-                    await SaveBundleManifest();
-                    _config.Version[2] = 0;
-                }
-            }
-            catch (HttpRequestException)
-            {
-                _config.Version[1]--;
-            }
+            tasks.AddRange(ManifestItem
+                .ParseAll(manifests)
+                .Select(assetManifest =>
+                    UpdateManifest(
+                        _config.ManifestPath() + assetManifest.Uri,
+                        CombinePath(assetManifest.Uri),
+                        assetManifest.Md5)
+                )
+            );
 
-            try
-            {
-                while (true)
-                {
-                    _config.Version[2]++;
-                    await SaveBundleManifest();
-                }
-            }
-            catch (HttpRequestException)
-            {
-                _config.Version[2]--;
-            }
-
-            return manifest;
-        }
-        
-        
-        private static async Task<string> SaveLatestAssetManifest()
-        {
-            var manifest = await SaveAssetManifest();
-            var oldVersion = _config.TruthVersion;
-
-            try
-            {
-                while (true)
-                {
-                    _config.TruthVersion = (_config.TruthVersion / 1000 + 1) * 1000;
-                    manifest = await SaveAssetManifest();
-                }
-            }
-            catch (HttpRequestException)
-            {
-                _config.TruthVersion -= 1000;
-                if (_config.TruthVersion < oldVersion)
-                    _config.TruthVersion = oldVersion;
-            }
-            
-            try
-            {
-                while (true)
-                {
-                    _config.TruthVersion = (_config.TruthVersion / 10 + 1) * 10;
-                    manifest = await SaveAssetManifest();
-                }
-            }
-            catch (HttpRequestException)
-            {
-                _config.TruthVersion -= 10;
-                if (_config.TruthVersion < oldVersion)
-                    _config.TruthVersion = oldVersion;
-            }
-
-            try
-            {
-                while (true)
-                {
-                    _config.TruthVersion++;
-                    manifest = await SaveAssetManifest();
-                }
-            }
-            catch (HttpRequestException)
-            {
-                _config.TruthVersion--;
-            }
-            
-            return manifest;
+            Task.WaitAll(tasks.ToArray());
+            tasks.Clear();
         }
 
-        private static async Task<string> GetManifest(string requestUri)
-        {
-            var m = await _httpClient.GetAsync(requestUri);
-            m.EnsureSuccessStatusCode();
-            var manifests = await m.Content.ReadAsStringAsync();
-            return manifests;
-        }
+        private string CombinePath(string dest) => Path.Combine(_dest, dest);
 
-        private static async Task<string> SaveManifest(string requestUri, string writePath)
-        {
-            var manifests = await GetManifest(requestUri);
-            var realpath = Path.Combine(writePath);
-            await System.IO.File.WriteAllTextAsync(realpath, manifests);
-            Console.WriteLine($"- {requestUri}");
-            return manifests;
-        }
-        
-        private static async Task UpdateManifest(string requestUri, string writePath, string md5Sum)
+        private async Task UpdateManifest(string requestUri, string writePath, string md5Sum)
         {
             if (File.Exists(writePath))
             {
@@ -192,12 +73,145 @@ namespace RediveExtract
                 await using var stream = File.OpenRead(writePath);
                 var realSum = BitConverter.ToString(await md5.ComputeHashAsync(stream)).Replace("-", "");
                 if (string.Equals(realSum, md5Sum, StringComparison.InvariantCultureIgnoreCase))
-                {
                     return;
-                }
             }
 
             await SaveManifest(requestUri, writePath);
+        }
+
+        private async Task<string> SaveLatestAssetManifest()
+        {
+            var guessArray = new[] {1000, 10, 1};
+            var guessTruthVersion = _config.TruthVersion;
+            var manifest = await GetAssetManifest(guessTruthVersion);
+            Console.WriteLine($":: Saving asset manifest from {guessTruthVersion}.");
+
+            foreach (var guessDelta in guessArray)
+            {
+                while (true)
+                {
+                    var tmpVersion = (guessTruthVersion / guessDelta + 1) * guessDelta;
+                    Console.Write($" Gueesing TruthVersion: {tmpVersion}...");
+
+                    try
+                    {
+                        manifest = await GetAssetManifest(tmpVersion);
+                    }
+                    catch (HttpRequestException)
+                    {
+                        Console.WriteLine("No.");
+                        break;
+                    }
+
+                    Console.WriteLine("Yes!");
+                    guessTruthVersion = tmpVersion;
+                }
+            }
+
+            SaveAssetManifest(manifest);
+            _config.TruthVersion = guessTruthVersion;
+            return manifest;
+        }
+
+
+        private async Task<string> SaveLatestBundleManifest()
+        {
+            var manifest = await GetBundleManifest();
+            var guessVersion = _config.Version; // shallow copy
+            Console.WriteLine($":: Saving bundle manifest from {Config.VersionString(guessVersion)}.");
+
+            for (var i = 0; i < guessVersion.Length; i++)
+            {
+                while (true)
+                {
+                    var tmpVersion = guessVersion.ToArray(); // deep copy
+                    tmpVersion[i]++;
+                    
+                    Console.Write($" Gueesing version: {Config.VersionString(tmpVersion)}...");
+
+                    try
+                    {
+                        manifest = await GetBundleManifest(tmpVersion);
+                    }
+                    catch (HttpRequestException)
+                    {
+                        Console.WriteLine("No.");
+                        break;
+                    }
+
+                    Console.WriteLine("Yes!");
+                    guessVersion = tmpVersion;
+                }
+            }
+
+            SaveBundleManifest(manifest);
+            _config.Version = guessVersion;
+            return manifest;
+        }
+
+
+        private Task<string> GetAssetManifest(int? truthVersion = null, string locale = null, string os = null) =>
+            GetManifest(
+                _config.ManifestPath(truthVersion, locale, os) + "manifest/manifest_assetmanifest");
+
+        private Task SaveAssetManifest(int? truthVersion = null, string locale = null, string os = null) =>
+            SaveManifest(
+                _config.ManifestPath(truthVersion, locale, os) + "manifest/manifest_assetmanifest",
+                CombinePath("manifest/manifest_assetmanifest"));
+
+        private void SaveAssetManifest(string manifest)
+        {
+            var path = CombinePath("manifest/manifest_assetmanifest");
+            var dir = Path.GetDirectoryName(path);
+            if (dir != null) Directory.CreateDirectory(dir);
+
+            File.WriteAllText(path, manifest);
+        }
+
+        private Task<string> GetBundleManifest(int[] version = null, string locale = null, string os = null) =>
+            GetManifest(
+                _config.BundlesPath(version, locale, os) + "manifest/bdl_assetmanifest");
+
+        private Task SaveBundleManifest() => SaveManifest(
+            _config.BundlesPath() + "manifest/bdl_assetmanifest",
+            CombinePath("manifest/bdl_assetmanifest"));
+
+        private void SaveBundleManifest(string manifest) =>
+            File.WriteAllText(CombinePath("manifest/bdl_assetmanifest"), manifest);
+
+        private Task SaveMovieManifest() => SaveManifest(
+            _config.MoviePath() + "manifest/moviemanifest",
+            CombinePath("manifest/moviemanifest"));
+
+        private Task SaveLowMovieManifest() => SaveManifest(
+            _config.LowMoviePath() + "manifest/moviemanifest",
+            CombinePath("manifest/low_moviemanifest"));
+
+        private Task SaveSoundManifest() => SaveManifest(
+            _config.SoundPath() + "manifest/sound2manifest",
+            CombinePath("manifest/sound2manifest"));
+
+        private async Task<string> GetManifest(string requestUri)
+        {
+            var m = await _client.GetAsync(requestUri);
+            m.EnsureSuccessStatusCode();
+            var manifests = await m.Content.ReadAsStringAsync();
+            return manifests;
+        }
+
+        private async Task SaveManifest(string requestUri, string writePath)
+        {
+            Console.WriteLine($"- {requestUri}");
+            var m = await _client.GetAsync(requestUri);
+            m.EnsureSuccessStatusCode();
+            var manifests = await m.Content.ReadAsStreamAsync();
+            await manifests.CopyToAsync(File.OpenWrite(writePath));
+        }
+
+        public void SaveConfig(FileInfo configFile)
+        {
+            using var fs = configFile.OpenWrite();
+            fs.Write(JsonSerializer.SerializeToUtf8Bytes(_config));
         }
     }
 }

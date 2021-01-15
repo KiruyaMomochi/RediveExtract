@@ -12,37 +12,58 @@ namespace RediveExtract
         public string Locale { get; set; } = "Jpn";
         public int[] Version { get; set; } = { 2, 3, 0 };
 
-        [JsonIgnore] private string TruthVersionString => TruthVersion.ToString("D8");
-        [JsonIgnore] private string VersionString => $"{Version[0]}.{Version[1]}.{Version[2]}";
-        [JsonIgnore] public string ManifestPath => $"dl/Resources/{TruthVersionString}/{Locale}/AssetBundles/{OS}/";
-        [JsonIgnore] public string MoviePath => $"dl/Resources/{TruthVersionString}/{Locale}/Movie/SP/High/";
-        [JsonIgnore] public string LowMoviePath => $"dl/Resources/{TruthVersionString}/{Locale}/Movie/SP/Low/";
-        [JsonIgnore] public string SoundPath => $"dl/Resources/{TruthVersionString}/{Locale}/Sound/";
-        [JsonIgnore] public string BundlesPath => $"dl/Bundles/{VersionString}/{Locale}/AssetBundles/{OS}/";
-    }
-
-    static partial class Program
-    {
-        private static async Task<Config> GetConfig()
+        public static string TruthVersionString(int truthVersion)
         {
-            var config = new Config();
-            try
-            {
-                await using var fs = _configFile.OpenRead();
-                config = await JsonSerializer.DeserializeAsync<Config>(fs);
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("! Warning: config.json not work.");
-            }
-
-            return config;
+            return truthVersion.ToString("D8");
         }
 
-        private static async Task SaveConfig()
+        public static string VersionString(int[] version)
         {
-            await using var fs = _configFile.OpenWrite();
-            await JsonSerializer.SerializeAsync(fs, _config);
+            return $"{version[0]}.{version[1]}.{version[2]}";
         }
+
+        public string ManifestPath(int? truthVersion = null, string locale = null, string os = null)
+        {
+            truthVersion ??= TruthVersion;
+            locale ??= Locale;
+            os ??= OS;
+            var truthVersionString = TruthVersionString(truthVersion.Value);
+            return $"dl/Resources/{truthVersionString}/{locale}/AssetBundles/{os}/";
+        }
+
+        public string MoviePath(int? truthVersion = null, string locale = null)
+        {
+            truthVersion ??= TruthVersion;
+            locale ??= Locale;
+            var truthVersionString = TruthVersionString(truthVersion.Value);
+            return $"dl/Resources/{truthVersionString}/{locale}/Movie/SP/High/";
+        }
+
+        public string LowMoviePath(int? truthVersion = null, string locale = null)
+        {
+            truthVersion ??= TruthVersion;
+            locale ??= Locale;
+            var truthVersionString = TruthVersionString(truthVersion.Value);
+            return $"dl/Resources/{truthVersionString}/{locale}/Movie/SP/Low/";
+        }
+
+        public string SoundPath(int? truthVersion = null, string locale = null)
+        {
+            truthVersion ??= TruthVersion;
+            locale ??= Locale;
+            var truthVersionString = TruthVersionString(truthVersion.Value);
+            return $"dl/Resources/{truthVersionString}/{locale}/Sound/";
+        }
+
+        public string BundlesPath(int[] version = null, string locale = null, string os = null)
+        {
+            version ??= Version;
+            locale ??= Locale;
+            os ??= OS;
+
+            var versionString = VersionString(version);
+            return $"dl/Bundles/{versionString}/{locale}/AssetBundles/{os}/";;
+        }
+        
     }
 }

@@ -9,32 +9,18 @@ using YamlDotNet.Serialization.NamingConventions;
 
 namespace RediveExtract
 {
-    static partial class Program
+    public static class ConstText
     {
-        private static readonly JsonSerializerOptions Options = new()
+        public static void ExtractConstText(FileInfo source, FileInfo json = null, FileInfo yaml = null)
         {
-            WriteIndented = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            Encoder = JavaScriptEncoder.Create
-            (
-                UnicodeRanges.BasicLatin,
-                UnicodeRanges.CjkUnifiedIdeographs,
-                UnicodeRanges.CjkSymbolsandPunctuation,
-                UnicodeRanges.Katakana,
-                UnicodeRanges.HalfwidthandFullwidthForms
-            )
-        };
-
-        private static void ExtractConstText(FileInfo source, FileInfo json = null, FileInfo yaml = null)
-        {
-            var file = LoadAssetFile(source);
+            var file = Unity3d.LoadAssetFile(source);
             var ls = file.Objects.OfType<MonoBehaviour>().First().ToType();
             var data = ls["dataArray"] ?? new object();
 
             if (json != null)
             {
                 using var fs = json.Create();
-                JsonSerializer.SerializeAsync(fs, data, Options).Wait();
+                JsonSerializer.SerializeAsync(fs, data, Json.Options).Wait();
             }
 
             if (yaml != null)

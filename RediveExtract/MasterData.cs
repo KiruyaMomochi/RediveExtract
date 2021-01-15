@@ -4,9 +4,9 @@ using AssetStudio;
 
 namespace RediveExtract
 {
-    static partial class Program
+    static class Database
     {
-        private static void ExtractMasterData(FileInfo source, FileInfo dest = null)
+        public static void ExtractMasterData(FileInfo source, FileInfo dest = null)
         {
             var am = new AssetsManager();
             am.LoadFiles(source.FullName);

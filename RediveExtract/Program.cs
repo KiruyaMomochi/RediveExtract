@@ -1,284 +1,127 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.CommandLine;
+﻿using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Text.Json;
 using System.Threading.Tasks;
-using AssetStudio;
 using RediveMediaExtractor;
 
 // ReSharper disable StringLiteralTypo
 
 namespace RediveExtract
 {
-    static partial class Program
+    internal static class Program
     {
-        private static HttpClient _httpClient;
-        private static readonly List<Task> Tasks = new();
-        private const string BaseAddress = "https://img-pc.so-net.tw";
-        private static FileInfo _configFile;
-        private static Config _config;
-
         private static void Main(string[] args)
         {
-            var rootCommand = new RootCommand("Redive Extractor")
+            
+            var rootCommand = new RootCommand("Redive Extractor\n" +
+                                              "Download and extract assets from game Princess Connect! Re:Dive.");
+
+            var fetch = new Command("fetch", "Fetch latest assets files.")
             {
-                new Option<FileInfo>("--config"),
-                new Option<string>("--output")
+                new Option<FileInfo>("--config", "The config.json file."),
+                new Option<string>("--output", "The directory to put the output files.")
             };
-            rootCommand.Handler = CommandHandler.Create<FileInfo, string>(GetManifest);
+            fetch.Handler = CommandHandler.Create<FileInfo, string>(DownloadManifests);
+            rootCommand.Add(fetch);
 
             var extract = new Command("extract");
 
-            var database = new Command("database")
+            var database = new Command("database", "Extract database file from unity3d.")
             {
-                new Option<FileInfo>("--source"),
-                new Option<FileInfo>("--dest")
+                new Option<FileInfo>("--source", "The unity3d asset file."),
+                new Option<FileInfo>("--dest", "Path to the output file.")
             };
-            database.Handler = CommandHandler.Create<FileInfo, FileInfo>(ExtractMasterData);
+            database.Handler = CommandHandler.Create<FileInfo, FileInfo>(Database.ExtractMasterData);
             extract.Add(database);
 
-            var storyData = new Command("storydata")
+            var storyData = new Command("storydata", "Extract story data from unity3d.")
             {
-                new Option<FileInfo>("--source"),
-                new Option<FileInfo>("--json"),
-                new Option<FileInfo>("--yaml"),
-                new Option<FileInfo>("--dest"),
-                new Option<FileInfo>("--lipsync")
+                new Option<FileInfo>("--source", "The unity3d asset file."),
+                new Option<FileInfo>("--json", "Path to the output json file"),
+                new Option<FileInfo>("--yaml", "Path to the output yaml file"),
+                new Option<FileInfo>("--dest", "Path to the output binary file"),
+                new Option<FileInfo>("--lipsync", "Path to the output lipsync file")
             };
             storyData.Handler =
-                CommandHandler.Create<FileInfo, FileInfo, FileInfo, FileInfo, FileInfo>(ExtractStoryData);
+                CommandHandler.Create<FileInfo, FileInfo, FileInfo, FileInfo, FileInfo>(Story.ExtractStoryData);
             extract.Add(storyData);
 
-            var constText = new Command("consttext")
+            var constText = new Command("consttext", "Extract const text from unity3d.")
             {
-                new Option<FileInfo>("--source"),
-                new Option<FileInfo>("--json"),
-                new Option<FileInfo>("--yaml")
+                new Option<FileInfo>("--source", "The unity3d asset file."),
+                new Option<FileInfo>("--json", "Path to the output json file"),
+                new Option<FileInfo>("--yaml", "Path to the output yaml file")
             };
             constText.Handler =
-                CommandHandler.Create<FileInfo, FileInfo, FileInfo>(ExtractConstText);
+                CommandHandler.Create<FileInfo, FileInfo, FileInfo>(ConstText.ExtractConstText);
             extract.Add(constText);
 
-            var usm = new Command("usm")
+            var usm = new Command("usm", "Extract videos from usm.")
             {
-                new Option<FileInfo>("--source"),
-                new Option<DirectoryInfo>("--dest"),
+                new Option<FileInfo>("--source", "The original usm file."),
+                new Option<DirectoryInfo>("--dest", "Path to the output directory."),
             };
             usm.Handler =
-                CommandHandler.Create<FileInfo, DirectoryInfo>(ExtractUsmFinal);
+                CommandHandler.Create<FileInfo, DirectoryInfo>(Cri.ExtractUsmFinal);
             extract.Add(usm);
 
-            var hca = new Command("hca")
+            var hca = new Command("hca", "Extract musics from hca.")
             {
-                new Option<FileInfo>("--source"),
-                new Option<FileInfo>("--dest"),
+                new Option<FileInfo>("--source", "The original hca file."),
+                new Option<FileInfo>("--dest", "Path to the output file."),
             };
             hca.Handler =
                 CommandHandler.Create<FileInfo, FileInfo>(Audio.HcaToWav);
             extract.Add(hca);
 
-            var adx = new Command("adx")
+            var adx = new Command("adx", "Extract musics from adx.")
             {
-                new Option<FileInfo>("--source"),
-                new Option<FileInfo>("--dest"),
+                new Option<FileInfo>("--source", "The original adx file."),
+                new Option<FileInfo>("--dest", "Path to the output file."),
             };
             adx.Handler =
                 CommandHandler.Create<FileInfo, FileInfo>(Audio.AdxToWav);
             extract.Add(adx);
 
-            var acb = new Command("acb")
+            var acb = new Command("acb", "Extract musics from acb.")
             {
-                new Option<FileInfo>("--source"),
-                new Option<DirectoryInfo>("--dest"),
+                new Option<FileInfo>("--source", "The original acb file."),
+                new Option<DirectoryInfo>("--dest", "Path to the output directory."),
             };
             acb.Handler =
                 CommandHandler.Create<FileInfo, DirectoryInfo>(Audio.AcbToWavs);
             extract.Add(acb);
 
-            var u3d = new Command("unity3d")
+            var u3d = new Command("unity3d", "Extract all things in unity3d file.")
             {
-                new Option<FileInfo>("--source"),
-                new Option<DirectoryInfo>("--dest")
+                new Option<FileInfo>("--source", "The original asset file."),
+                new Option<DirectoryInfo>("--dest", "Path to the output directory.")
             };
             u3d.Handler =
-                CommandHandler.Create<FileInfo, DirectoryInfo>(ExtractUnity3d);
+                CommandHandler.Create<FileInfo, DirectoryInfo>(Unity3d.ExtractUnity3d);
             extract.Add(u3d);
 
             // TODO: do extract vtt according to MonoBehaviour
-            var vtt = new Command("vtt")
+            var vtt = new Command("vtt", "Extract vtt from unity3d asset.")
             {
-                new Option<FileInfo>("--source"),
-                new Option<FileInfo>("--dest")
+                new Option<FileInfo>("--source", "The original asset file."),
+                new Option<FileInfo>("--dest", "Path to the output file.")
             };
             vtt.Handler =
-                CommandHandler.Create<FileInfo, FileInfo>(ExtractVtt);
+                CommandHandler.Create<FileInfo, FileInfo>(Vtt.ExtractVtt);
             extract.Add(vtt);
 
             rootCommand.Add(extract);
             rootCommand.InvokeAsync(args).Wait();
         }
 
-        private static void ExtractVtt(FileInfo source, FileInfo dest)
+        private static async Task DownloadManifests(FileInfo config = null, string dest = ".")
         {
-            var am = new AssetsManager();
-            am.LoadFiles(source.FullName);
-            var srt = am.assetsFileList[0].Objects.OfType<MonoBehaviour>().First();
-
-            using var df = new StreamWriter(dest.OpenWrite());
-            df.WriteLine($"WEBVTT - {srt.m_Name}\n");
+            config ??= new FileInfo("config.json");
             
-            if (srt.ToType()["recordList"] is not IEnumerable<object> records)
-            {
-                throw new TypeLoadException();
-            }
-
-            foreach (OrderedDictionary rec in records)
-            {
-                df.WriteLine($"{ConvertTime(rec["startTime"])} --> {ConvertTime(rec["endTime"])}");
-                df.WriteLine(rec["text"]);
-                df.WriteLine();
-            }
-
-            static string ConvertTime(object obj)
-            {
-                if (obj is not float time)
-                {
-                    throw new ArgumentException(null, nameof(obj));
-                }
-                
-                var seconds = (long) time;
-                var ms = (long) ((time - seconds) * 1000);
-                var hr = seconds / 3600;
-                var mi = seconds % 3600 / 60;
-                var se = seconds % 60;
-                return $"{hr:D2}:{mi:D2}:{se:D2}.{ms:D3}";
-            }
-        }
-        
-
-        private static void ExtractUnity3d(FileInfo source, DirectoryInfo dest)
-        {
-            var am = new AssetsManager();
-            am.LoadFiles(source.FullName);
-            var dic = am.assetsFileList[0].ObjectsDic;
-            if (dic[1] is not AssetBundle assetBundle) 
-                return;
-            
-            var container = assetBundle.m_Container;
-            foreach (var (internalPath, value) in container)
-            {
-                try
-                {
-
-                    var id = value.asset.m_PathID;
-                    var file = dic[id];
-                    var savePath = Path.Combine(dest.FullName, internalPath ?? "unknown");
-                    var saveDir = Path.GetDirectoryName(savePath) ?? throw new InvalidOperationException();
-                    Directory.CreateDirectory(saveDir);
-
-                    switch (file)
-                    {
-                        case Texture2D texture2D:
-                        {
-                            var bitmap = texture2D.ConvertToBitmap(true);
-                            bitmap.Save(savePath);
-                            break;
-                        }
-                        case TextAsset textAsset:
-                        {
-                            using var f = File.OpenWrite(savePath);
-                            f.Write(textAsset.m_Script);
-                            break;
-                        }
-                        case MonoBehaviour monoBehaviour:
-                        {
-                            using var f = File.OpenWrite(savePath);
-                            monoBehaviour.ToType();
-                            JsonSerializer.SerializeAsync(f, monoBehaviour.ToType(), Options).Wait();
-                            break;
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine($"Exception {e} occurs when processing");
-                    Console.WriteLine($"{internalPath} in {source.FullName}");
-                }
-            }
-        }
-
-        private static async Task ExtractUsmFinal(FileInfo source, DirectoryInfo dest)
-        {
-            dest ??= source.Directory;
-            if (dest == null)
-            {
-                throw new DirectoryNotFoundException();
-            }
-
-            var bins = Video.ExtractUsm(source);
-            var taskList = new List<Task>();
-            // ReSharper disable once InconsistentNaming
-            var m2vs = new List<string>();
-            // ReSharper disable once IdentifierTypo
-            var wavs = new List<string>();
-
-            foreach (var bin in bins)
-            {
-                var noExt = Path.GetFileNameWithoutExtension(Path.GetFileName(bin));
-                if (noExt == null)
-                    throw new FileNotFoundException();
-                var wavPath = Path.Combine(dest.FullName, noExt + ".wav");
-
-                switch (Path.GetExtension(bin))
-                {
-                    case ".bin" or ".hca":
-                        wavs.Add(wavPath);
-                        taskList.Add(Task.Run(() =>
-                            Audio.HcaToWav(bin, wavPath)
-                        ));
-                        break;
-                    case ".adx":
-                        wavs.Add(wavPath);
-                        taskList.Add(Task.Run(() =>
-                            Audio.AdxToWav(bin, wavPath)
-                        ));
-                        break;
-                    case ".m2v":
-                        m2vs.Add(bin);
-                        break;
-                    default:
-                        throw new NotSupportedException(bin);
-                }
-            }
-
-            await Task.WhenAll(taskList);
-
-            Tasks.Clear();
-            // ReSharper disable once InconsistentNaming
-            taskList.AddRange(from m2v in m2vs
-                let mp4 = Path.ChangeExtension(source.Name, "mp4")
-                select Video.M2VToMp4(m2v, wavs, Path.Combine(dest.FullName, mp4)));
-            await Task.WhenAll(taskList);
-
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            foreach (var bin in bins) File.Delete(bin);
-        }
-
-        private static async Task Init()
-        {
-            _config = await GetConfig();
-
-            _httpClient = new HttpClient
-            {
-                BaseAddress = new Uri(BaseAddress)
-            };
+            var manifest = new Manifest(config, dest);
+            await manifest.SaveAllManifests();
+            manifest.SaveConfig(config);
         }
     }
 }
