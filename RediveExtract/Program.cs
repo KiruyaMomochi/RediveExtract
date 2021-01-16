@@ -115,11 +115,11 @@ namespace RediveExtract
             rootCommand.InvokeAsync(args).Wait();
         }
 
-        private static async Task DownloadManifests(FileInfo config = null, string dest = ".")
+        private static async Task DownloadManifests(FileInfo config = null, string output = ".")
         {
             config ??= new FileInfo("config.json");
             
-            var manifest = new Manifest(config, dest);
+            var manifest = new Manifest(config, output);
             await manifest.SaveAllManifests();
             manifest.SaveConfig(config);
         }
