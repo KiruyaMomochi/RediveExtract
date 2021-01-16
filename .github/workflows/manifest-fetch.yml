@@ -37,6 +37,7 @@ jobs:
       id: kyaru
       working-directory: "./RediveData"
       run: |
+        Import-Module ../Scripts/redive.psm1
         if ((git status './manifest/masterdata_assetmanifest' -s) -or !(Test-Path db)) {
           echo "::set-output name=database::true"
         }
@@ -46,7 +47,7 @@ jobs:
         if ((git status './manifest/consttext_assetmanifest' -s) -or !(Test-Path consttext)) {
           echo "::set-output name=consttext::true"
         }
-        pwsh ../Scripts/Commit-Data.ps1 -Type Manifest
+        Invoke-RediveCommit -Type Manifest
     - name: Dispatch Database Fetch
       if: ${{ steps.kyaru.outputs.database }}
       uses: KiruyaMomochi/workflow-dispatch@v1

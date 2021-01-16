@@ -35,12 +35,13 @@ jobs:
     - name: Run Script
       working-directory: "./RediveData"
       run: |
-        pwsh ../Scripts/Export-RediveDB.ps1 -Program ${{ github.workspace }}/RediveExtract/RediveExtract.exe
+        Import-Module ../Scripts/redive.psm1
+        Export-RediveDb -Program ${{ github.workspace }}/RediveExtract/RediveExtract.exe
     - name: Commit Files
       working-directory: "./RediveData"
       run: |
-        git pull
-        pwsh ../Scripts/Commit-Data.ps1 -Type Database
+        Import-Module ../Scripts/redive.psm1
+        Invoke-RediveCommit -Type Database
     - name: Upload database
       uses: actions/upload-artifact@v2
       with:

@@ -33,10 +33,10 @@ jobs:
     - name: Run Script
       working-directory: "./RediveData"
       run: |
-        pwsh ../Scripts/Export-RediveStory.ps1 -Program ${{ github.workspace }}/RediveExtract/RediveExtract.exe
+        Import-Module ../Scripts/redive.psm1
+        Export-RediveStory -Program ${{ github.workspace }}/RediveExtract/RediveExtract.exe
     - name: Commit Files
       working-directory: "./RediveData"
       run: |
-        git pull
-        pwsh ../Scripts/Commit-Data.ps1 -Type Storytext
-        
+        Import-Module ../Scripts/redive.psm1
+        Invoke-RediveCommit -Type Storytext
