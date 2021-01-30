@@ -29,7 +29,11 @@ function Save-AssetItem {
     [Parameter()][string]$OutputDirectory,
     [Parameter()][ManifestItemTypes]$Type = [ManifestItemTypes]::AssetBundles
   )
-    
+  
+  begin {
+    $wc = New-Object System.Net.WebClient
+  }
+
   process {
     # Check the existence of item
     if ($Item) {
@@ -50,13 +54,14 @@ function Save-AssetItem {
         
     # Create directory
     EnsureDirectory -Directory (Split-Path $Path)
+    $Path = Resolve-Path $Path
 
     # Calculate hash prefix
     $HashPre = $MD5.Substring(0, 2)
 
     try {
       $Private:ProgressPreference = "SilentlyContinue"
-      $null = Invoke-WebRequest -Uri "https://img-pc.so-net.tw/dl/pool/$Type/$HashPre/$MD5" -OutFile $Path
+      $wc.DownloadFile("https://img-pc.so-net.tw/dl/pool/$Type/$HashPre/$MD5", $Path)
     }
     catch {
       Write-Host "Error occured when saving ${Path}:" -ForegroundColor Red
@@ -257,6 +262,16 @@ function Get-GitAddLines {
     }
     return ($diff | Select-String -Raw '^\+[^+]' | ForEach-Object { $_.Substring(1) })
   }
+}
+
+function Save-AllManifests {
+  param (
+      $ManifestPath = './manifest/',
+      $OutputDirectory
+  )
+  Get-ChildItem $ManifestPath -Exclude '*moviemanifest', 'sound*manifest', 'manifest_assetmanifest' | Import-Manifest | Save-AssetItem -OutputDirectory $OutputDirectory
+  Get-ChildItem $ManifestPath 'moviemanifest' | Import-Manifest | Save-AssetItem -OutputDirectory $OutputDirectory -Type Movie
+  Get-ChildItem $ManifestPath 'sound2manifest' | Import-Manifest | Save-AssetItem -OutputDirectory $OutputDirectory -Type Sound
 }
 
 # Get-GitAddLines -Path .\manifest\storydata_assetmanifest -Last 1 | ConvertTo-AssetItem | Save-AssetItem -OutputDirectory (Join-Path $env:TEMP 'test') | Expand-AssetItem -Program C:\Users\xtyzw\Projects\RediveExtract\RediveExtract\bin\Release\net5.0\RediveExtract.exe -OutputDirectory (Join-Path $env:TEMP '233')
