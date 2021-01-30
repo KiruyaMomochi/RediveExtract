@@ -54,7 +54,6 @@ function Save-AssetItem {
         
     # Create directory
     EnsureDirectory -Directory (Split-Path $Path)
-    $Path = Resolve-Path $Path
 
     # Calculate hash prefix
     $HashPre = $MD5.Substring(0, 2)
