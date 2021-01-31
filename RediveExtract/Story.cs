@@ -16,33 +16,41 @@ namespace RediveExtract
             FileInfo lipsync = null)
         {
             var file = Unity3d.LoadAssetFile(source);
-            
-            var textFile = file.Objects.OfType<TextAsset>().First();
-            var textBuffer = textFile.m_Script;
-            var textName = textFile.m_Name;
 
-            List<Command> commands = null;
-
-            Console.WriteLine(textName);
-
-            if (dest != null)
+            try
             {
-                using var f = dest.Create();
-                f.Write(textBuffer);
+                var textFile = file.Objects.OfType<TextAsset>().First();
+                var textBuffer = textFile.m_Script;
+                var textName = textFile.m_Name;
+
+                List<Command> commands = null;
+
+                Console.WriteLine(textName);
+
+                if (dest != null)
+                {
+                    using var f = dest.Create();
+                    f.Write(textBuffer);
+                }
+
+                if (json != null)
+                {
+                    commands = Deserializer.Deserialize(textBuffer);
+                    using var fj = json.Create();
+                    fj.Write(commands.ToUtf8Json());
+                }
+
+                if (yaml != null)
+                {
+                    commands ??= Deserializer.Deserialize(textBuffer);
+                    using var fy = yaml.CreateText();
+                    fy.Write(commands.ToReadableYaml());
+                }
             }
-
-            if (json != null)
+            catch (InvalidOperationException e)
             {
-                commands = Deserializer.Deserialize(textBuffer);
-                using var fj = json.Create();
-                fj.Write(commands.ToUtf8Json());
-            }
-
-            if (yaml != null)
-            {
-                commands ??= Deserializer.Deserialize(textBuffer);
-                using var fy = yaml.CreateText();
-                fy.Write(commands.ToReadableYaml());
+                Console.Error.WriteLine($"::warning file={source}::No TextAsset found");
+                throw;
             }
 
             if (lipsync == null) return;
@@ -55,7 +63,7 @@ namespace RediveExtract
             }
             catch (InvalidOperationException)
             {
-                Console.Error.WriteLine($"No lipsync in {textName}");
+                Console.Error.WriteLine($"No MonoBehaviour in {source}");
                 throw;
             }
         }
