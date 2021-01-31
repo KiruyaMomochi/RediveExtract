@@ -47,10 +47,9 @@ namespace RediveExtract
                     fy.Write(commands.ToReadableYaml());
                 }
             }
-            catch (InvalidOperationException e)
+            catch (InvalidOperationException)
             {
                 Console.Error.WriteLine($"::warning file={source}::No TextAsset found");
-                throw;
             }
 
             if (lipsync == null) return;
@@ -64,7 +63,6 @@ namespace RediveExtract
             catch (InvalidOperationException)
             {
                 Console.Error.WriteLine($"No MonoBehaviour in {source}");
-                throw;
             }
         }
     }
