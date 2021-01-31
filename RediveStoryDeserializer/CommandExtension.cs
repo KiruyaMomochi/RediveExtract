@@ -13,8 +13,7 @@ namespace RediveStoryDeserializer
             if (command.CommandName == null)
                 return null;
 
-            Dictionary<string, string[]> dict = new Dictionary<string, string[]>();
-            dict.Add(command.CommandName, command.Args);
+            var dict = new Dictionary<string, string[]> {{command.CommandName, command.Args}};
             return dict;
         }
     }

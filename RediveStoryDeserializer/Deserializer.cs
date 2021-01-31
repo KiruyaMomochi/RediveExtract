@@ -59,7 +59,7 @@ namespace RediveStoryDeserializer
             }
             else
             {
-                Console.WriteLine("Warning: list index out of range");
+                Console.Error.WriteLine("Warning: list index out of range");
                 command = new Command
                 {
                     CommandConfig = null,
