@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -19,8 +20,7 @@ namespace RediveExtract
             var textFile = file.Objects.OfType<TextAsset>().First();
             var textBuffer = textFile.m_Script;
             var textName = textFile.m_Name;
-            
-            var ls = file.Objects.OfType<MonoBehaviour>().First().ToType();
+
             List<Command> commands = null;
 
             Console.WriteLine(textName);
@@ -45,10 +45,18 @@ namespace RediveExtract
                 fy.Write(commands.ToReadableYaml());
             }
 
-            if (lipsync != null)
+            if (lipsync == null) return;
+            
+            try
             {
+                var ls = file.Objects.OfType<MonoBehaviour>().First().ToType();
                 using var fs = lipsync.Create();
                 JsonSerializer.SerializeAsync(fs, ls).Wait();
+            }
+            catch (InvalidOperationException)
+            {
+                Console.Error.WriteLine($"No lipsync in {textName}");
+                throw;
             }
         }
     }
