@@ -297,7 +297,7 @@ function ConvertAudio {
   process {
     if ($Path.Exists) {
       $m4aPath = [System.IO.Path]::ChangeExtension($Path.FullName, '.m4a')
-      ffmpeg -hide_banner -loglevel warning -y -i $Path -c:a libfdk_aac -vbr 5 -movflags faststart $m4aPath
+      ffmpeg -hide_banner -loglevel warning -y -i $Path -c:a -b:a 192k -movflags faststart $m4aPath
       Remove-Item $Path
     }
     else {
