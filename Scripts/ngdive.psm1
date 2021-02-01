@@ -94,7 +94,10 @@ function Expand-AssetItem {
     $Extension = [System.IO.Path]::GetExtension($Path)
     $BaseName = [System.IO.Path]::GetFileNameWithoutExtension($Path)
 
-    if ($Type -eq [AssetTypes]::Unity3D) {
+    if ($Extension -eq '.awb') {
+      # Pass
+    }
+    elseif ($Type -eq [AssetTypes]::Unity3D) {
       $exportFiles = & $Program extract unity3d --source $Path --dest $OutputDirectoryFull
     }
     elseif ($Type -eq [AssetTypes]::Movie -or $Extension -eq '.usm') {
@@ -289,13 +292,15 @@ function Save-AllAssets {
 
 function ConvertAudio {
   param (
-      [Parameter(Mandatory, ValueFromPipeline)][System.IO.DirectoryInfo]$Path
+    [Parameter(Mandatory, ValueFromPipeline)][System.IO.FileInfo]$Path
   )
   process {
     if ($Path.Exists) {
-      ffmpeg -hide_banner -loglevel warning -y -i $_ -vbr 5 -movflags faststart [System.IO.Path]::ChangeExtension($_, '.m4a')
-      Remove-Item $_
-    } else {
+      $m4aPath = [System.IO.Path]::ChangeExtension($Path.FullName, '.m4a')
+      ffmpeg -hide_banner -loglevel warning -y -i $Path -vbr 5 -movflags faststart $m4aPath
+      Remove-Item $Path
+    }
+    else {
       Write-Error "Path $Path not exist"
     }
   }
@@ -316,7 +321,7 @@ function Expand-AllAssets {
   $VoiceDirectory = Join-Path $OutputDirectory "Voices"
 
   $null = New-Item -ItemType Directory $AssetDirectory, $BgmDirectory, $MovieDirectory, $SoundDirectory,
-                               $VoiceDirectory, "$MovieDirectory/t", "$VoiceDirectory/t" -Force
+  $VoiceDirectory, "$MovieDirectory/t", "$VoiceDirectory/t" -Force
   
   # Expand unity3d files
   Get-ChildItem (Join-Path $AssetPath 'a') | ForEach-Object {
