@@ -39,7 +39,7 @@ namespace RediveExtract
                 {
                     if (x is OrderedDictionary od && od["TextId"] is int id && od["TextString"] is string str)
                     {
-                        dict.Add(id, str);
+                        dict.Add(id, str.Replace("\\n", "\n"));
                     }
                 });
                 
