@@ -34,8 +34,9 @@ namespace RediveExtract
                 }
                 catch (Exception e)
                 {
-                    Console.Error.WriteLine($"Exception {e.GetType()} occurs when processing");
-                    Console.Error.WriteLine($"{internalPath} in {source.FullName}");
+                    Console.Error.Write("Exception occurs when processing");
+                    Console.Error.WriteLine($"{internalPath} in {source.FullName}:");
+                    Console.Error.WriteLine(e);
                 }
             }
         }
@@ -49,7 +50,7 @@ namespace RediveExtract
             {
                 case null:
                     return false;
-                case Texture2D texture2D:
+                case Texture2D texture2D when !savePath.EndsWith(".ttf"):
                 {
                     if (changeExtension)
                         savePath = Path.ChangeExtension(savePath, "png");
@@ -71,6 +72,12 @@ namespace RediveExtract
                         savePath = Path.ChangeExtension(savePath, "json");
                     using var f = File.OpenWrite(savePath);
                     JsonSerializer.SerializeAsync(f, monoBehaviour.ToType(), Json.Options).Wait();
+                    break;
+                }
+                case Font font:
+                {
+                    using var f = File.OpenWrite(savePath);
+                    f.Write(font.m_FontData);
                     break;
                 }
                 case GameObject gameObject when savePath.EndsWith(".prefab"):
