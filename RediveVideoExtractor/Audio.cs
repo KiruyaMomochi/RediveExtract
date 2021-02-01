@@ -102,7 +102,15 @@ namespace RediveMediaExtractor
                 return;
 
             using var fs = File.OpenWrite(output);
-            HcaToWav(fileData, fs, decodeParams);
+            try
+            {
+                HcaToWav(fileData, fs, decodeParams);
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine($"Failed to convert {output}:");
+                Console.Error.WriteLine(e);
+            }
         }
 
         public static void AdxToWav(FileInfo input, FileInfo output)
