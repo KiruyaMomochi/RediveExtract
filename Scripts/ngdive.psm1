@@ -97,12 +97,12 @@ function Expand-AssetItem {
     if ($Type -eq [AssetTypes]::Unity3D) {
       $exportFiles = & $Program extract unity3d --source $Path --dest $OutputDirectoryFull
     }
-    elseif ($Type -eq [AssetTypes]::Movie -or $Extension -eq 'usm') {
+    elseif ($Type -eq [AssetTypes]::Movie -or $Extension -eq '.usm') {
       & $Program extract usm --source $Path --dest $OutputDirectoryFull
       Get-ChildItem "$OutputDirectoryFull/*.wav" | ConvertAudio
       $exportFiles = $OutputDirectory
     }
-    elseif ($Type -eq [AssetTypes]::Sound -or $Extension -eq 'acb') {
+    elseif ($Type -eq [AssetTypes]::Sound -or $Extension -eq '.acb') {
       & $Program extract acb --source $Path --dest $OutputDirectoryFull
       Get-ChildItem "$OutputDirectoryFull/*.wav" | ConvertAudio
       $exportFiles = $OutputDirectory
