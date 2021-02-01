@@ -34,8 +34,8 @@ namespace RediveExtract
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine($"Exception {e} occurs when processing");
-                    Console.WriteLine($"{internalPath} in {source.FullName}");
+                    Console.Error.WriteLine($"Exception {e.GetType()} occurs when processing");
+                    Console.Error.WriteLine($"{internalPath} in {source.FullName}");
                 }
             }
         }
