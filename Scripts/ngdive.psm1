@@ -315,13 +315,13 @@ function Expand-AllAssets {
   $SoundDirectory = Join-Path $OutputDirectory "Sounds"
   $VoiceDirectory = Join-Path $OutputDirectory "Voices"
 
-  New-Item -ItemType Directory $AssetDirectory, $BgmDirectory, $MovieDirectory, $SoundDirectory,
-                               $VoiceDirectory, "$MovieDirectory/t", "$VoiceDirectory/t"
+  $null = New-Item -ItemType Directory $AssetDirectory, $BgmDirectory, $MovieDirectory, $SoundDirectory,
+                               $VoiceDirectory, "$MovieDirectory/t", "$VoiceDirectory/t" -Force
   
   # Expand unity3d files
   Get-ChildItem (Join-Path $AssetPath 'a') | ForEach-Object {
     Write-Output $_.Name
-    Expand-AssetItem -Program $Program -OutputDirectory $AssetDirectory -Type [AssetTypes]::Unity3D -Path $_
+    Expand-AssetItem -Program $Program -OutputDirectory $AssetDirectory -Type Unity3D -Path $_
   }
 
   # Expand bgm files
