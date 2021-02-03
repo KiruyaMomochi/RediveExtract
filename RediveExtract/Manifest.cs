@@ -204,8 +204,9 @@ namespace RediveExtract
             Console.WriteLine($"- {requestUri}");
             var m = await _client.GetAsync(requestUri);
             m.EnsureSuccessStatusCode();
-            var manifests = await m.Content.ReadAsStreamAsync();
-            await manifests.CopyToAsync(File.OpenWrite(writePath));
+            using var writeStream = File.OpenWrite(writePath);
+            using var manifests = await m.Content.ReadAsStreamAsync();
+            await manifests.CopyToAsync(writeStream);
         }
 
         public void SaveConfig(FileInfo configFile)
