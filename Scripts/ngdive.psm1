@@ -302,8 +302,8 @@ function Save-AllAssets {
     [string]$OutputDirectory = './RawData/'
   )
   Get-ChildItem $ManifestDirectory -Exclude '*moviemanifest', 'sound*manifest', 'manifest_assetmanifest' | Import-Manifest | Save-AssetItem -OutputDirectory $OutputDirectory
-  Get-ChildItem $ManifestDirectory 'moviemanifest' | Import-Manifest | Save-AssetItem -OutputDirectory $OutputDirectory -Type Movie
-  Get-ChildItem $ManifestDirectory 'sound2manifest' | Import-Manifest | Save-AssetItem -OutputDirectory $OutputDirectory -Type Sound
+  Get-ChildItem (Join-Path $ManifestDirectory 'moviemanifest') | Import-Manifest | Save-AssetItem -OutputDirectory $OutputDirectory -Type Movie
+  Get-ChildItem (Join-Path $ManifestDirectory 'sound2manifest') | Import-Manifest | Save-AssetItem -OutputDirectory $OutputDirectory -Type Sound
 }
 
 function ConvertAudio {
