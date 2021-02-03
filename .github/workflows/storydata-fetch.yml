@@ -1,4 +1,4 @@
-name: Fetch Latest Storytext
+name: Fetch Latest Storydata
 
 on:
   workflow_dispatch:
@@ -44,5 +44,5 @@ jobs:
       run: |
         Import-Module ../Scripts/ngdive.psm1
         git pull
-        Invoke-RediveCommit -Type Storytext
+        Invoke-RediveCommit -Type StoryData
         git push
