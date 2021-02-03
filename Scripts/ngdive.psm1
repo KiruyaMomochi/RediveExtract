@@ -252,7 +252,7 @@ function Invoke-RediveCommit {
       }
       ([AssetTypes]::Database) {  
         git add db/json
-        git add db/yaml
+        git add db/csv
       }
       ([AssetTypes]::StoryData) {  
         git add storytext/
