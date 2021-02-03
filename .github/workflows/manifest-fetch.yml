@@ -60,7 +60,7 @@ jobs:
       if: ${{ steps.kyaru.outputs.storydata }}
       uses: KiruyaMomochi/workflow-dispatch@v1
       with:
-        workflow: "storytext-fetch.yml"
+        workflow: "storydata-fetch.yml"
         token: ${{ secrets.REDIVEDATA_ACCESS_TOKEN }}
     - name: Dispatch Subtitle Fetch
       if: ${{ steps.kyaru.outputs.storydata }}
