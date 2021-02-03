@@ -384,8 +384,94 @@ function Expand-AllAssets {
   }
 }
 
-# Get-GitAddLines -Path .\manifest\storydata_assetmanifest -Last 1 | ConvertTo-AssetItem | Where-Object Path -Like '*storydata_[0-9]*' | Save-AssetItem -OutputDirectory (Join-Path $env:TEMP 'test') | Expand-AssetItem -Program C:\Users\xtyzw\Projects\RediveExtract\RediveExtract\bin\Release\net5.0\RediveExtract.exe -OutputDirectory (Join-Path $env:TEMP '233')
-# Get-GitAddLines -Path .\manifest\storydata_assetmanifest -Last 1 | ConvertTo-AssetItem | Where-Object Path -Like '*storydata_movie_[0-9]*' | Save-AssetItem -OutputDirectory (Join-Path $env:TEMP 'test') | Expand-AssetItem -Program C:\Users\xtyzw\Projects\RediveExtract\RediveExtract\bin\Release\net5.0\RediveExtract.exe -OutputDirectory (Join-Path $env:TEMP '233')
-# Get-GitAddLines -Path .\manifest\storydata_assetmanifest -Last 1 | ConvertTo-AssetItem | Where-Object Path -Like '*storydata_tw_movie_[0-9]*' | Save-AssetItem -OutputDirectory (Join-Path $env:TEMP 'test') | Expand-AssetItem -Program C:\Users\xtyzw\Projects\RediveExtract\RediveExtract\bin\Release\net5.0\RediveExtract.exe -OutputDirectory (Join-Path $env:TEMP '233')
-# Get-GitAddLines -Path .\manifest\masterdata_assetmanifest -Last 1 | ConvertTo-AssetItem | Save-AssetItem -OutputDirectory (Join-Path $env:TEMP 'test') | Expand-AssetItem -Program C:\Users\xtyzw\Projects\RediveExtract\RediveExtract\bin\Release\net5.0\RediveExtract.exe -OutputDirectory (Join-Path $env:TEMP '666')
-# Import-Manifest .\manifest\consttext_assetmanifest | Save-AssetItem -OutputDirectory (Join-Path $env:TEMP 'test') | Expand-AssetItem -Program C:\Users\xtyzw\Projects\RediveExtract\RediveExtract\bin\Release\net5.0\RediveExtract.exe -OutputDirectory (Join-Path $env:TEMP '666')
+function Expand-NewAssets {
+  param (
+    [Parameter(Mandatory)][string]$Program,
+    [Parameter(Mandatory)][string]$Commit,
+    [string]$ManifestDirectory = './RediveData/manifest/',
+    [string]$AssetPath = './RawData/',
+    [string]$OutputDirectory = './ExtractedData/'
+  )
+
+  $ManifestDirectory = Resolve-Path $ManifestDirectory
+  $AssetPath = Resolve-Path $AssetPath
+  $OutputDirectory = Resolve-Path $OutputDirectory
+  $Program = Resolve-Path $Program
+
+  $AssetDirectory = Join-Path $OutputDirectory "Assets"
+  $BgmDirectory = Join-Path $OutputDirectory "Bgm"
+  $MovieDirectory = Join-Path $OutputDirectory "Movies"
+  $SoundDirectory = Join-Path $OutputDirectory "Sounds"
+  $VoiceDirectory = Join-Path $OutputDirectory "Voices"
+  
+  Push-Location $ManifestDirectory
+  git pull
+  
+  Get-ChildItem $ManifestDirectory -Exclude '*moviemanifest', 'sound*manifest', 'manifest_assetmanifest' | 
+  Get-GitAddLines -Commit $Commit | 
+  ConvertFrom-Manifest | ForEach-Object {
+    $AssetItemPath = $_ | Save-AssetItem -OutputDirectory $AssetPath -Type AssetBundles
+
+    switch -Wildcard ($_.Path) {
+      'a/*' {
+        Expand-AssetItem -Program $Program -Path $AssetItemPath -OutputDirectory $AssetDirectory -Type Unity3D
+        Break
+      }
+      Default {
+        Write-Error "Unknown directory $($Path[0])"
+      }
+    }
+  }
+  
+  Get-ChildItem (Join-Path $ManifestDirectory 'moviemanifest') |
+  Get-GitAddLines -Commit $Commit | 
+  ConvertFrom-Manifest | ForEach-Object {
+    $AssetItemPath = $_ | Save-AssetItem -OutputDirectory $AssetPath -Type Movie
+    $BaseName = (Get-Item $AssetItemPath).BaseName
+
+    switch -Wildcard ($_.Path) {
+      'm/t/*' {  
+        Expand-AssetItem -Program $Program -Path $AssetItemPath -OutputDirectory $MovieDirectory/t/$BaseName
+        Break
+      }
+      'm/*' {
+        Expand-AssetItem -Program $Program -Path $AssetItemPath -OutputDirectory $MovieDirectory/$BaseName
+        Break
+      }
+      Default {
+        Write-Error "Unknown directory $($Path[0])"
+      }
+    }
+  }
+  
+  Get-ChildItem (Join-Path $ManifestDirectory 'sound2manifest') | 
+  Get-GitAddLines -Commit $Commit | 
+  ConvertFrom-Manifest | ForEach-Object {
+    $AssetItemPath = $_ | Save-AssetItem -OutputDirectory $AssetPath -Type Sound
+    $BaseName = (Get-Item $AssetItemPath).BaseName
+
+    switch -Wildcard ($_.Path) {
+      'v/t/*' {
+        Expand-AssetItem -Program $Program -Path $AssetItemPath -OutputDirectory $VoiceDirectory/t/$BaseName
+        Break
+      }
+      'b/*' {
+        Expand-AssetItem -Program $Program -Path $AssetItemPath -OutputDirectory $BgmDirectory/$BaseName
+        Break
+      }
+      'v/*' {
+        Expand-AssetItem -Program $Program -Path $AssetItemPath -OutputDirectory $VoiceDirectory/$BaseName
+        Break
+      }
+      's/*' {
+        Expand-AssetItem -Program $Program -Path $AssetItemPath -OutputDirectory $SoundDirectory/$BaseName
+        Break
+      }
+      Default {
+        Write-Error "Unknown directory $($Path[0])"
+      }
+    }
+  }
+
+  Pop-Location
+}
