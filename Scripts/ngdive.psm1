@@ -10,9 +10,10 @@ enum AssetTypes {
   StoryData
   ConstText
   Unity3D
-  Movie
-  Sound
+  Usm
+  Acb
   Subtitle
+  Skip
 }
 
 class AssetItem {
@@ -84,7 +85,7 @@ function Expand-AssetItem {
     [string]$OutputDirectory = ".",
     [AssetTypes]$Type
   )
-    
+
   begin {
     $null = New-Item -ItemType Directory -Force $OutputDirectory
   }
@@ -94,65 +95,84 @@ function Expand-AssetItem {
     $Extension = [System.IO.Path]::GetExtension($Path)
     $BaseName = [System.IO.Path]::GetFileNameWithoutExtension($Path)
 
-    if ($Extension -eq '.awb') {
-      # Pass
+    if ($null -ne $Type) {
+      # Break
     }
-    elseif ($Type -eq [AssetTypes]::Unity3D) {
-      $exportFiles = & $Program extract unity3d --source $Path --dest $OutputDirectoryFull
+    elseif ($Extension -eq '.usm') {
+      $Type = [AssetTypes]::Usm
     }
-    elseif ($Type -eq [AssetTypes]::Movie -or $Extension -eq '.usm') {
-      & $Program extract usm --source $Path --dest $OutputDirectoryFull
-      Get-ChildItem "$OutputDirectoryFull/*.wav" | ConvertAudio
-      $exportFiles = $OutputDirectory
+    elseif ($Extension -eq '.acb') {
+      $Type = [AssetTypes]::Acb
     }
-    elseif ($Type -eq [AssetTypes]::Sound -or $Extension -eq '.acb') {
-      & $Program extract acb --source $Path --dest $OutputDirectoryFull
-      Get-ChildItem "$OutputDirectoryFull/*.wav" | ConvertAudio
-      $exportFiles = $OutputDirectory
-    }
-    elseif ($BaseName -like 'storydata_movie_[0-9]*') {
-      $dest = Join-Path $OutputDirectoryFull "$BaseName.vtt"
-      & $Program extract vtt --source $Path --dest $dest
-      $exportFiles = $dest
+    elseif ($BaseName -like 'storydata_movie_[0-9]*' -or $BaseName -like 'storydata_tw_movie_[0-9]*') {
+      $Type = [AssetTypes]::Subtitle
     }
     elseif ($BaseName -like 'storydata_[0-9]*') {
-      $id = $Matches[1]
-      $json = Join-Path $OutputDirectoryFull "json/$id.json"
-      $yaml = Join-Path $OutputDirectoryFull "yaml/$id.yaml"
-      & $Program extract storydata --source $Path --json $json --yaml $yaml
+      $Type = [AssetTypes]::StoryData
     }
     elseif ($BaseName -like 'consttext_*') {
-      $Suffix = $BaseName.Replace('consttext_', '')
-      $json = Join-Path $OutputDirectoryFull "$Suffix.json"
-      $yaml = Join-Path $OutputDirectoryFull "$Suffix.yaml"
-      & $Program extract consttext --source $Path --json $json --yaml $yaml
+      $Type = [AssetTypes]::ConstText
     }
     elseif ($BaseName -like 'masterdata_*') {
-      $db = Join-Path $OutputDirectoryFull "$BaseName.sqlite"
-      
-      & $Program extract database --source $Path --dest $db
-      $tables = sqlite3 $db "SELECT tbl_name FROM sqlite_master WHERE type='table' and tbl_name not like 'sqlite_%'"
-
-      $OutputDirectoryFull = $OutputDirectoryFull.Replace("\", "/")
-      $csv = "$OutputDirectoryFull/csv"
-      $json = "$OutputDirectoryFull/json"
-
-      $null = New-Item -ItemType Directory -Force $csv, $json
-      $tables | ForEach-Object {
-        sqlite3 $db '.header on' '.mode csv' ".output $csv/$_.csv" "select * from $_;" '.mode json' ".output $json/$_.json" "select * from $_;"
-      }
-      $exportFiles = $tables
+      $Type = [AssetTypes]::Database
+    }
+    elseif ($Extension -eq 'awb') {
+      $Type = [AssetTypes]::Skip
     }
     else {
-      $exportFiles = & $Program extract unity3d --source $Path --dest $OutputDirectoryFull
+      $Type = [AssetTypes]::Unity3D
     }
 
-    Join-Path $OutputDirectoryFull '*.wav' -Resolve | ForEach-Object {
-      $wav = $_.FullName
-      $flac = [System.IO.Path]::ChangeExtension($wav, "flac")
-      flac -f $wav -o $flac
-      kid3-cli -c "select $wav" -c copy -c "select $flac" -c paste
-      Remove-Item $wav
+    switch ($Type) {
+      ([AssetTypes]::Usm) {
+        & $Program extract usm --source $Path --dest $OutputDirectoryFull
+        Get-ChildItem "$OutputDirectoryFull/*.wav" | ConvertAudio
+        $exportFiles = $OutputDirectory
+      }
+      ([AssetTypes]::Acb) {
+        & $Program extract acb --source $Path --dest $OutputDirectoryFull
+        Get-ChildItem "$OutputDirectoryFull/*.wav" | ConvertAudio
+        $exportFiles = $OutputDirectory
+      }
+      ([AssetTypes]::Unity3D) {
+        $exportFiles = & $Program extract unity3d --source $Path --dest $OutputDirectoryFull
+      }
+      ([AssetTypes]::Subtitle) {
+        $BaseName = $BaseName.Replace('storydata_', '')
+        $dest = Join-Path $OutputDirectoryFull "$BaseName.vtt"
+        & $Program extract vtt --source $Path --dest $dest
+        $exportFiles = $dest
+      }
+      ([AssetTypes]::StoryData) {
+        $BaseName = $BaseName.Replace('storydata_', '')
+        $json = Join-Path $OutputDirectoryFull "json/$BaseName.json"
+        $yaml = Join-Path $OutputDirectoryFull "yaml/$BaseName.yaml"
+        & $Program extract storydata --source $Path --json $json --yaml $yaml
+      }
+      ([AssetTypes]::ConstText) {
+        $BaseName = $BaseName.Replace('consttext_', '')
+        $json = Join-Path $OutputDirectoryFull "$BaseName.json"
+        $yaml = Join-Path $OutputDirectoryFull "$BaseName.yaml"
+        & $Program extract consttext --source $Path --json $json --yaml $yaml
+      }
+      ([AssetTypes]::Database) {
+        $db = Join-Path $OutputDirectoryFull "$BaseName.sqlite"
+      
+        & $Program extract database --source $Path --dest $db
+        $tables = sqlite3 $db "SELECT tbl_name FROM sqlite_master WHERE type='table' and tbl_name not like 'sqlite_%'"
+
+        $OutputDirectoryFull = $OutputDirectoryFull.Replace("\", "/")
+        $csv = "$OutputDirectoryFull/csv"
+        $json = "$OutputDirectoryFull/json"
+
+        $null = New-Item -ItemType Directory -Force $csv, $json
+        $tables | ForEach-Object {
+          Write-Output $_
+          sqlite3 $db '.header on' '.mode csv' ".output $csv/$_.csv" "select * from $_;" '.mode json' ".output $json/$_.json" "select * from $_;"
+        }
+        $exportFiles = $tables
+      }
+      Default {}
     }
 
     return $exportFiles
@@ -220,16 +240,15 @@ function Invoke-RediveCommit {
     else {
       $time = [System.TimeZoneInfo]::ConvertTimeBySystemTimeZoneId((Get-Date), 'Taipei Standard Time').ToString("yyyy-MM-dd HH:mm:ss")
     }
-
-    $message = "${Type}: $($json.Version -join '.')($($json.TruthVersion)) at $time"
-
+    
     git status -s
     git config user.name 'KiruyaMomochi'
     git config user.email 'KiruyaMomochi@users.noreply.github.com'
-  
+
     switch ($Type) {
       ([AssetTypes]::Manifest) { 
-        git add .
+        git add manifest/
+        git add config.json
       }
       ([AssetTypes]::Database) {  
         git add db/json
@@ -247,12 +266,9 @@ function Invoke-RediveCommit {
       }
     }
 
-    if (-not $NoPull) {
-      git pull            
-    }
+    $message = "${Type}: $($json.Version -join '.')($($json.TruthVersion)) at $time"
       
     git commit -m $message
-    git push
   }
 }
 
