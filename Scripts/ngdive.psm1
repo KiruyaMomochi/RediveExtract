@@ -116,7 +116,7 @@ function Expand-AssetItem {
     elseif ($BaseName -like 'masterdata_*') {
       $Type = [AssetTypes]::Database
     }
-    elseif ($Extension -eq 'awb') {
+    elseif ($Extension -eq '.awb') {
       $Type = [AssetTypes]::Skip
     }
     else {
