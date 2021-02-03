@@ -341,3 +341,6 @@ healthchecksdb
 
 # Redive Data
 RediveData
+
+# Database
+*.sqlite
