@@ -18,7 +18,7 @@ jobs:
         repository: "KiruyaMomochi/RediveData"
         path: "./RediveData"
         token: ${{ secrets.REDIVEDATA_ACCESS_TOKEN }}
-        fetch-depth: 3
+        fetch-depth: 5
     - name: Setup .NET Core 5.0.x
       uses: actions/setup-dotnet@v1
       with:
@@ -34,7 +34,7 @@ jobs:
       working-directory: "./RediveData"
       run: |
         Import-Module ../Scripts/ngdive.psm1
-        Get-GitAddLines -Path ./manifest/storydata_assetmanifest -Commit HEAD~2 |
+        Get-GitAddLines -Path ./manifest/storydata_assetmanifest -Last 1 |
           ConvertFrom-Manifest |
           Where-Object Path -Like '*storydata_[0-9]*' |
           Save-AssetItem -OutputDirectory . |
