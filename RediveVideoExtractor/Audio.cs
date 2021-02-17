@@ -17,7 +17,7 @@ namespace RediveMediaExtractor
         {
             if (input == null) throw new ArgumentNullException(nameof(input));
             if (output == null) throw new ArgumentNullException(nameof(output));
-            
+
             var data = new HcaReader
             {
                 Decrypt = true,
@@ -40,7 +40,7 @@ namespace RediveMediaExtractor
         {
             if (input == null) throw new ArgumentNullException(nameof(input));
             if (output == null) throw new ArgumentNullException(nameof(output));
-            
+
             using var hcaStream = new OneWayHcaAudioStream(input, decodeParams, true);
             hcaStream.CopyTo(output);
         }
@@ -50,11 +50,11 @@ namespace RediveMediaExtractor
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
             if (dest == null) throw new ArgumentNullException(nameof(dest));
-            
+
             const uint newEncryptionVersion = 0x01300000;
 
             var acb = AcbFile.FromFile(source.FullName);
-            
+
             var acbFormatVersion = acb.FormatVersion;
 
             if (acb.ExternalAwb != null)
@@ -69,17 +69,25 @@ namespace RediveMediaExtractor
                     var record = entry.Value;
                     var extractFileName = Path.Combine(dest.FullName,
                         Path.GetFileNameWithoutExtension(source.Name) + $"_{record.CueId:D3}.wav");
-                    AfsToWavs(record, File.OpenRead(awb.FileName), decodeParams, extractFileName);
+                    
+                    var guessAwbFullName = Path.Combine(source.DirectoryName ?? ".", awb.FileName);
+
+                    if (source.DirectoryName != null && File.Exists(guessAwbFullName))
+                        AfsToWavs(record, File.OpenRead(guessAwbFullName), decodeParams, extractFileName);
+                    else if (File.Exists(awb.FileName))
+                        AfsToWavs(record, File.OpenRead(awb.FileName), decodeParams, extractFileName);
+                    else
+                        Console.Error.WriteLine($"Awb file not found, skip {source}");
                 }
             }
-            
+
             if (acb.InternalAwb != null)
             {
                 var awb = acb.InternalAwb;
                 var decodeParams = DecodeParams.CreateDefault(
                     0x0030D9E8, 0,
                     acbFormatVersion >= newEncryptionVersion ? awb.HcaKeyModifier : 0);
-                
+
                 foreach (var entry in awb.Files)
                 {
                     var record = entry.Value;
@@ -117,7 +125,7 @@ namespace RediveMediaExtractor
         {
             if (input == null) throw new ArgumentNullException(nameof(input));
             if (output == null) throw new ArgumentNullException(nameof(output));
-            
+
             try
             {
                 var data = new AdxReader().Read(input.OpenRead());
