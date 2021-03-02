@@ -81,7 +81,7 @@ namespace RediveExtract
 
         private async Task<string> SaveLatestAssetManifest()
         {
-            var guessArray = new[] {1000, 10, 1};
+            var guessArray = new[] {1000, 100, 10, 1};
             var guessTruthVersion = _config.TruthVersion;
             var manifest = await GetAssetManifest(guessTruthVersion);
             Console.WriteLine($":: Saving asset manifest from {guessTruthVersion}.");
