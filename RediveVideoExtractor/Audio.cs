@@ -62,7 +62,7 @@ namespace RediveMediaExtractor
                 var awb = acb.ExternalAwb;
                 var decodeParams = DecodeParams.CreateDefault(
                     0x0030D9E8, 0,
-                    acbFormatVersion >= newEncryptionVersion ? awb.HcaKeyModifier : 0);
+                    acbFormatVersion >= newEncryptionVersion ? awb.HcaKeyModifier : (ushort) 0);
 
                 foreach (var entry in awb.Files)
                 {
@@ -86,7 +86,7 @@ namespace RediveMediaExtractor
                 var awb = acb.InternalAwb;
                 var decodeParams = DecodeParams.CreateDefault(
                     0x0030D9E8, 0,
-                    acbFormatVersion >= newEncryptionVersion ? awb.HcaKeyModifier : 0);
+                    acbFormatVersion >= newEncryptionVersion ? awb.HcaKeyModifier : (ushort) 0);
 
                 foreach (var entry in awb.Files)
                 {
