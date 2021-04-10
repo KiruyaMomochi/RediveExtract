@@ -12,7 +12,6 @@ namespace RediveExtract
     {
         private static void Main(string[] args)
         {
-            
             var rootCommand = new RootCommand("Redive Extractor\n" +
                                               "Download and extract assets from game Princess Connect! Re:Dive.");
 
@@ -97,8 +96,10 @@ namespace RediveExtract
                 new Option<FileInfo>("--source", "The original asset file."),
                 new Option<DirectoryInfo>("--dest", "Path to the output directory.")
             };
+
             u3d.Handler =
                 CommandHandler.Create<FileInfo, DirectoryInfo>(Unity3d.ExtractUnity3d);
+
             extract.Add(u3d);
 
             // TODO: do extract vtt according to MonoBehaviour
@@ -107,6 +108,7 @@ namespace RediveExtract
                 new Option<FileInfo>("--source", "The original asset file."),
                 new Option<FileInfo>("--dest", "Path to the output file.")
             };
+
             vtt.Handler =
                 CommandHandler.Create<FileInfo, FileInfo>(Vtt.ExtractVtt);
             extract.Add(vtt);
@@ -118,7 +120,7 @@ namespace RediveExtract
         private static async Task DownloadManifests(FileInfo config = null, string output = ".")
         {
             config ??= new FileInfo("config.json");
-            
+
             var manifest = new Manifest(config, output);
             await manifest.SaveAllManifests();
             manifest.SaveConfig(config);
