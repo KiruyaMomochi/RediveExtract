@@ -460,6 +460,7 @@ function Get-ManifestExtraMessage {
         if ($null -ne $unit_data) {
             $message += "Unit data:`n"
             foreach ($data in $unit_data) {
+                if ($data.unit_id -eq 'unit_id') { break }
                 $message += ' ' + $data.unit_id + '. ' + '*' + $data.rarity + ' ' + $data.unit_name;
                 if ($data.is_limited -eq 1) {$message += ' Limited'}
                 if ($data.only_disp_owned -eq 1) {$message += ' Disp'}
