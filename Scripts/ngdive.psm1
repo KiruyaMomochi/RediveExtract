@@ -16,6 +16,19 @@ enum AssetTypes {
   Skip
 }
 
+enum LoginBonusType
+{
+  StartDash = 2
+  Normal
+  Campaign
+  CampaignFlatoutEffect
+  CampaignNewyear
+  Adv
+  Countdown
+  CharacterBirthday
+  ThirdLoginBonu
+}
+
 class AssetItem {
   [string] $Md5
   [string] $Path
@@ -40,6 +53,8 @@ function Save-AssetItem {
   }
 
   process {
+    $wc ??= New-Object System.Net.WebClient
+
     # Check the existence of item
     if ($Item) {
       $Md5 = $Item.Md5
@@ -62,15 +77,22 @@ function Save-AssetItem {
 
     # Calculate hash prefix
     $HashPre = $MD5.Substring(0, 2)
+    $Uri = "https://img-pc.so-net.tw/dl/pool/$Type/$HashPre/$MD5"
 
     try {
       $Private:ProgressPreference = "SilentlyContinue"
-      $wc.DownloadFile("https://img-pc.so-net.tw/dl/pool/$Type/$HashPre/$MD5", $Path)
+      $wc.DownloadFile($Uri, $Path)
     }
     catch {
-      Write-Host "Error occured when saving ${Path}:" -ForegroundColor Red
-      Write-Host $_
-      return;
+      try {
+        Write-Host "WebClient download failed ${Path}:" -ForegroundColor Red
+        Invoke-WebRequest -Uri $Uri -OutFile $Path
+      }
+      catch {
+        Write-Host "Error occured when saving ${Path}:" -ForegroundColor Red
+        Write-Host $_
+        return;
+      }
     }
 
     return $Path
@@ -439,6 +461,14 @@ function Get-ManifestExtraMessage {
                 $message += ' ' + $campaign.id + '. ' + [CampaignCategory].GetEnumName([Int32]$campaign.campaign_category) + '(' + $campaign.value + ') ' + "`n"
             }
         }
+        
+        $login_bonus = Get-CsvAddRows -Path ./db/csv/login_bonus_data.csv -Commit HEAD
+        if ($null -ne $login_bonus) {
+            $message += "Login Bonus:`n"
+            foreach ($bonus in $login_bonus) {
+                $message += ' ' + $bonus.login_bonus_id + '. ' + $bonus.name + '(' + [LoginBonusType]::GetEnumName([Int32]$bonus.login_bonus_type) +') ' + $bonus.count_num + "`n"
+            }
+        }
 
         $tower_area_datas = Get-CsvAddRows -Path ./db/csv/tower_area_data.csv -Commit HEAD
         if ($null -ne $tower_area_datas) {
@@ -458,15 +488,18 @@ function Get-ManifestExtraMessage {
         
         $unit_data = Get-CsvAddRows -Path ./db/csv/unit_data.csv -Commit HEAD
         if ($null -ne $unit_data) {
-            $message += "Unit data:`n"
+            $unit_data_message = "Unit data:`n"
             foreach ($data in $unit_data) {
-                if ($data.unit_id -eq 'unit_id') { break }
-                $message += ' ' + $data.unit_id + '. ' + '*' + $data.rarity + ' ' + $data.unit_name;
-                if ($data.is_limited -eq 1) {$message += ' Limited'}
-                if ($data.only_disp_owned -eq 1) {$message += ' Disp'}
-                $message += "`n";
+                if ($data.unit_id -eq 'unit_id') { $unit_data_message = $null; break }
+                $unit_data_message += ' ' + $data.unit_id + '. ' + '*' + $data.rarity + ' ' + $data.unit_name;
+                if ($data.is_limited -eq 1) {$unit_data_message += ' Limited'}
+                if ($data.only_disp_owned -eq 1) {$unit_data_message += ' Disp'}
+                $unit_data_message += "`n";
             }
+            $message += $unit_data_message
         }
+
+
     }
     catch {
         Write-Error "Exception $_"
