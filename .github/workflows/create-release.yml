@@ -25,7 +25,7 @@ jobs:
     - name: Build
       run: dotnet build --configuration Release --no-restore
     - name: Publish
-      run: dotnet publish RediveExtract --configuration Release --no-restore --output bin
+      run: dotnet publish src/RediveExtract --configuration Release --no-restore --output bin
     - name: Release
       id: create_release
       uses: actions/create-release@v1

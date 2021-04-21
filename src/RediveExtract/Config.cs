@@ -64,6 +64,5 @@ namespace RediveExtract
             var versionString = VersionString(version);
             return $"dl/Bundles/{versionString}/{locale}/AssetBundles/{os}/";;
         }
-        
     }
 }

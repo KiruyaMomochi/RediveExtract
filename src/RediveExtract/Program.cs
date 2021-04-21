@@ -88,7 +88,7 @@ namespace RediveExtract
                 new Option<DirectoryInfo>("--dest", "Path to the output directory."),
             };
             acb.Handler =
-                CommandHandler.Create<FileInfo, DirectoryInfo>(Audio.AcbToWavs);
+                CommandHandler.Create<FileInfo, DirectoryInfo>(Audio.AcbToWavsCommand);
             extract.Add(acb);
 
             var u3d = new Command("unity3d", "Extract all things in unity3d file.")
@@ -98,7 +98,7 @@ namespace RediveExtract
             };
 
             u3d.Handler =
-                CommandHandler.Create<FileInfo, DirectoryInfo>(Unity3d.ExtractUnity3d);
+                CommandHandler.Create<FileInfo, DirectoryInfo>(Unity3d.ExtractUnity3dCommand);
 
             extract.Add(u3d);
 

@@ -1,9 +1,9 @@
 [submodule "AssetStudioCore"]
-	path = AssetStudioCore
+	path = src/AssetStudioCore
 	url = https://github.com/KiruyaMomochi/AssetStudioCore
 [submodule "CriDemuxer"]
-	path = CriDemuxer
+	path = src/CriDemuxer
 	url = https://github.com/KiruyaMomochi/CriDemuxerCore
 [submodule "HcaConverter"]
-	path = HcaConverter
+	path = src/HcaConverter
 	url = https://github.com/KiruyaMomochi/HcaConverterCore

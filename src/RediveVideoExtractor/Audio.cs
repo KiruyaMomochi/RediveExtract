@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using DereTore.Exchange.Archive.ACB;
@@ -46,8 +47,17 @@ namespace RediveMediaExtractor
         }
 
         // ReSharper disable once IdentifierTypo
-        public static void AcbToWavs(FileInfo source, DirectoryInfo dest)
+        public static void AcbToWavsCommand(FileInfo source, DirectoryInfo dest)
         {
+            foreach (var wav in AcbToWavs(source, dest))
+                Console.WriteLine(wav);
+        }
+        
+        // ReSharper disable once IdentifierTypo
+        public static List<string> AcbToWavs(FileInfo source, DirectoryInfo dest)
+        {
+            var res = new List<string>();
+            
             if (source == null) throw new ArgumentNullException(nameof(source));
             if (dest == null) throw new ArgumentNullException(nameof(dest));
 
@@ -73,11 +83,13 @@ namespace RediveMediaExtractor
                     var guessAwbFullName = Path.Combine(source.DirectoryName ?? ".", awb.FileName);
 
                     if (source.DirectoryName != null && File.Exists(guessAwbFullName))
-                        AfsToWavs(record, File.OpenRead(guessAwbFullName), decodeParams, extractFileName);
+                        AfsToWav(record, File.OpenRead(guessAwbFullName), decodeParams, extractFileName);
                     else if (File.Exists(awb.FileName))
-                        AfsToWavs(record, File.OpenRead(awb.FileName), decodeParams, extractFileName);
+                        AfsToWav(record, File.OpenRead(awb.FileName), decodeParams, extractFileName);
                     else
-                        Console.Error.WriteLine($"Awb file not found, skip {source}");
+                        throw new FileNotFoundException($"Awb file not found, skip {source}", awb.FileName);
+                    
+                    res.Add(extractFileName);
                 }
             }
 
@@ -93,13 +105,17 @@ namespace RediveMediaExtractor
                     var record = entry.Value;
                     var extractFileName = Path.Combine(dest.FullName,
                         Path.GetFileNameWithoutExtension(source.Name) + $"_{record.CueId:D3}.wav");
-                    AfsToWavs(record, acb.Stream, decodeParams, extractFileName);
+                    AfsToWav(record, acb.Stream, decodeParams, extractFileName);
+                    
+                    res.Add(extractFileName);
                 }
             }
+
+            return res;
         }
 
         // ReSharper disable once IdentifierTypo
-        private static void AfsToWavs(Afs2FileRecord afsRecord, Stream awbStream, DecodeParams decodeParams,
+        private static void AfsToWav(Afs2FileRecord afsRecord, Stream awbStream, DecodeParams decodeParams,
             string output)
         {
             using var fileData =
@@ -114,10 +130,10 @@ namespace RediveMediaExtractor
             {
                 HcaToWav(fileData, fs, decodeParams);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 Console.Error.WriteLine($"Failed to convert {output}:");
-                Console.Error.WriteLine(e);
+                throw;
             }
         }
 

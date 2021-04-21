@@ -9,8 +9,9 @@ namespace RediveExtract
 {
     public static class Cri
     {
-        public static async Task ExtractUsmFinal(FileInfo source, DirectoryInfo dest)
+        public static async Task<List<string>> ExtractUsmFinal(FileInfo source, DirectoryInfo dest)
         {
+            var res = new List<string>();
             dest ??= source.Directory;
             if (dest == null)
                 throw new DirectoryNotFoundException();
@@ -50,18 +51,33 @@ namespace RediveExtract
                         throw new NotSupportedException(bin);
                 }
             }
-
+            
+            res.AddRange(wavs);
             await Task.WhenAll(taskList);
+
+            var baseName = Path.Combine(dest.FullName, Path.ChangeExtension(source.Name, null));
 
             // ReSharper disable once InconsistentNaming
-            taskList.AddRange(from m2v in m2vs
-                let mp4 = Path.ChangeExtension(source.Name, "mp4")
-                select Video.M2VToMp4(m2v, wavs, Path.Combine(dest.FullName, mp4)));
+            taskList.AddRange(m2vs.Select(
+                (m2v, i) =>
+                {
+                    var mp4 = baseName;
+                    if (i == 0)
+                        mp4 += ".mp4";
+                    else
+                        mp4 = $"{mp4}_{i}.mp4";
+                    
+                    res.Add(mp4);
+                    return Video.M2VToMp4(m2v, wavs, mp4);
+                })
+            );
             await Task.WhenAll(taskList);
-
+            
             GC.Collect();
             GC.WaitForPendingFinalizers();
             foreach (var bin in bins) File.Delete(bin);
+            
+            return res;
         }
 
     }

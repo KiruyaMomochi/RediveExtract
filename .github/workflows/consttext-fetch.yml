@@ -32,14 +32,14 @@ jobs:
     - name: Run Script
       working-directory: "./RediveData"
       run: |
-        Import-Module ../Scripts/ngdive.psm1
+        Import-Module ../scripts/ngdive.psm1
         Import-Manifest ./manifest/consttext_assetmanifest | 
           Save-AssetItem -OutputDirectory '.' | 
           Expand-AssetItem -Program ${{ github.workspace }}/RediveExtract/RediveExtract.exe -OutputDirectory ./consttext
     - name: Commit Files
       working-directory: "./RediveData"
       run: |
-        Import-Module ../Scripts/ngdive.psm1
+        Import-Module ../scripts/ngdive.psm1
         git pull
         Invoke-RediveCommit -Type ConstText
         git push

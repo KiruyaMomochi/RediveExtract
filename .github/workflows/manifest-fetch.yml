@@ -37,7 +37,7 @@ jobs:
       id: kyaru
       working-directory: "./RediveData"
       run: |
-        Import-Module ../Scripts/ngdive.psm1
+        Import-Module ../scripts/ngdive.psm1
         if ((git status './manifest/masterdata_assetmanifest' -s) -or !(Test-Path db)) {
           echo "::set-output name=database::true"
         }

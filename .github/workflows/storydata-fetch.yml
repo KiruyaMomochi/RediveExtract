@@ -33,7 +33,7 @@ jobs:
     - name: Run Script
       working-directory: "./RediveData"
       run: |
-        Import-Module ../Scripts/ngdive.psm1
+        Import-Module ../scripts/ngdive.psm1
         Get-GitAddLines -Path ./manifest/storydata_assetmanifest -Last 1 |
           ConvertFrom-Manifest |
           Where-Object Path -Like '*storydata_[0-9]*' |
@@ -42,7 +42,7 @@ jobs:
     - name: Commit Files
       working-directory: "./RediveData"
       run: |
-        Import-Module ../Scripts/ngdive.psm1
+        Import-Module ../scripts/ngdive.psm1
         git pull
         Invoke-RediveCommit -Type StoryData
         git push
