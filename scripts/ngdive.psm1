@@ -91,7 +91,7 @@ function Save-AssetItem {
       catch {
         Write-Host "Error occured when saving ${Path}:" -ForegroundColor Red
         Write-Host $_
-        return;
+        return
       }
     }
 
@@ -644,7 +644,7 @@ function Get-CsvAddRows {
     [int]
     $Last = 1,
     [switch]
-    $AllowStructureChange = $false
+    $AllowStructureChange
   )
   
   process {  
@@ -656,6 +656,7 @@ function Get-CsvAddRows {
     }
 
     $header = Get-Content $item -Head 1
+    $null = $PSBoundParameters.Remove('AllowStructureChange')
     $content = Get-GitAddLines @PSBoundParameters
 
     if ($null -eq $content) {
