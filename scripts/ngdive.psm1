@@ -458,7 +458,7 @@ function Get-ManifestExtraMessage {
         if ($null -ne $campaigns) {
             $message += "Campign:`n"
             foreach ($campaign in $campaigns) {
-                $message += ' ' + $campaign.id + '. ' + [CampaignCategory].GetEnumName([Int32]$campaign.campaign_category) + '(' + $campaign.value + ') ' + "`n"
+                $message += ' ' + $campaign.id + '. ' + ([CampaignCategory].GetEnumName([Int32]$campaign.campaign_category) ?? 'Unknown') + '(' + $campaign.value + ') ' + "`n"
             }
         }
         
@@ -466,7 +466,7 @@ function Get-ManifestExtraMessage {
         if ($null -ne $login_bonus) {
             $message += "Login Bonus:`n"
             foreach ($bonus in $login_bonus) {
-                $message += ' ' + $bonus.login_bonus_id + '. ' + $bonus.name + '(' + [LoginBonusType]::GetEnumName([Int32]$bonus.login_bonus_type) +') ' + $bonus.count_num + "`n"
+                $message += ' ' + $bonus.login_bonus_id + '. ' + $bonus.name + '(' + ([LoginBonusType].GetEnumName([Int32]$bonus.login_bonus_type) ?? 'Unknown') +') ' + $bonus.count_num + "`n"
             }
         }
 
@@ -499,7 +499,49 @@ function Get-ManifestExtraMessage {
             $message += $unit_data_message
         }
 
+        $banner = Get-CsvAddRows -Path ./db/csv/banner.csv -Commit HEAD
+        if ($null -ne $banner)
+        {
+          $banner_message = "Banner:`n"
+          foreach ($data in $banner) {
+            $banner_message += ' ' + $data.banner_id + '. ' + $data.start_date + ' - ' + $data.end_date + "`n"
+          }
+          $message += $banner_message
+        }
 
+        $free_gacha = Get-CsvAddRows -Path ./db/csv/campaign_freegacha.csv -Commit HEAD
+        if ($null -ne $free_gacha)
+        {
+          $free_gacha_message = "Free gacha: `n"
+          foreach ($data in $free_gacha) {
+            $free_gacha_message += ' '
+            if ($data.freegacha_1 -eq 1) { $free_gacha_message += '[1] '}
+            if ($data.freegacha_10 -eq 1) { $free_gacha_message += '[10] '}
+            $free_gacha_message += $data.start_time + ' - ' + $data.end_time
+            $free_gacha_message += "`n"
+          }
+          $message += $free_gacha_message
+        }
+
+        $event_story_data = Get-CsvAddRows -Path ./db/csv/event_story_data.csv -Commit HEAD -AllowStructureChange
+        $hatsune_schedule = Get-CsvAddRows -Path ./db/csv/hatsune_schedule.csv -Commit HEAD
+        if ($null -ne $hatsune_schedule)
+        {
+          $hatsune_schedule_message = "Hatsune schedule: `n"
+          foreach ($data in $hatsune_schedule) {
+            $hatsune_schedule_message += ' ' + $data.event_id + ' '
+            $event_story = Where-Object -InputObject $event_story_data -Property value -EQ -Value ($data.event_id)
+            if ($null -ne $event_story) {
+              $hatsune_schedule_message += ($event_story.title -join ' ')
+            }
+            $hatsune_schedule_message += "`n"
+            $hatsune_schedule_message += '  Teaser: ' + $data.teaser_time + "`n"
+            $hatsune_schedule_message += '  Start: ' + $data.start_time + "`n"
+            $hatsune_schedule_message += '  End: ' + $data.end_time + "`n"
+            $hatsune_schedule_message += '  Close: ' + $data.close_time + "`n"
+          }
+          $message += $hatsune_schedule_message
+        }
     }
     catch {
         Write-Error "Exception $_"
@@ -600,7 +642,9 @@ function Get-CsvAddRows {
     $Commit,
     [Parameter(ParameterSetName = "Log")]
     [int]
-    $Last = 1
+    $Last = 1,
+    [switch]
+    $AllowStructureChange = $false
   )
   
   process {  
@@ -613,8 +657,15 @@ function Get-CsvAddRows {
 
     $header = Get-Content $item -Head 1
     $content = Get-GitAddLines @PSBoundParameters
+
     if ($null -eq $content) {
         return
+    }
+
+    $content_firstline = $content | Select-Object -First 1 
+    if ((-not $AllowStructureChange) -and ($header -eq $content_firstline))
+    {
+      return
     }
     
     return (ConvertFrom-Csv -InputObject $content -Header $header.Split(','))
