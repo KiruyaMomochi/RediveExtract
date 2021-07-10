@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using AssetStudio;
+using SixLabors.ImageSharp;
 
 namespace RediveExtract
 {
@@ -67,8 +68,8 @@ namespace RediveExtract
                 {
                     if (changeExtension)
                         savePath = Path.ChangeExtension(savePath, "png");
-                    var bitmap = texture2D.ConvertToBitmap(true);
-                    bitmap.Save(savePath);
+                    var bitmap = texture2D.ConvertToImage(true);
+                    bitmap.SaveAsPng(savePath);
                     res.Add(savePath);
                     break;
                 }
