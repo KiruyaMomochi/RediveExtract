@@ -83,26 +83,26 @@ namespace TextureSplit
                 if (materialObj is not long materialId) continue;
                 if (dic[materialId] is not Material material) continue;
                 if (!material.m_SavedProperties.m_TexEnvs[0].Value.m_Texture.TryGet(out Texture2D texture2D)) continue;
-                var bitmap = texture2D.ConvertToBitmap(true);
+                var bitmap = texture2D.ConvertToImage(true);
 
                 var mSprites = monoDictionary["mSprites"];
                 if (mSprites is not IEnumerable<object> datum) continue;
 
-                Console.WriteLine(bitmap.PixelFormat);
-                foreach (OrderedDictionary data in datum)
-                {
-                    var sprite = new UISpriteData(data);
-
-                    var pixelFormat = bitmap.PixelFormat switch
-                    {
-                        PixelFormat.Format32bppArgb => PixelFormat.Format32bppPArgb,
-                        _ => bitmap.PixelFormat
-                    };
-
-                    var cropped = bitmap.Clone(new Rectangle(sprite.x, sprite.y, sprite.width, sprite.height),
-                        pixelFormat);
-                    cropped.Save($"C:\\Users\\xtyzw\\Downloads\\test\\{sprite.name}.png");
-                }
+                // Console.WriteLine(bitmap.PixelFormat);
+                // foreach (OrderedDictionary data in datum)
+                // {
+                //     var sprite = new UISpriteData(data);
+                //
+                //     var pixelFormat = bitmap.PixelFormat switch
+                //     {
+                //         PixelFormat.Format32bppArgb => PixelFormat.Format32bppPArgb,
+                //         _ => bitmap.PixelFormat
+                //     };
+                //
+                //     var cropped = bitmap.Clone(new Rectangle(sprite.x, sprite.y, sprite.width, sprite.height),
+                //         pixelFormat);
+                //     cropped.Save($"C:\\Users\\xtyzw\\Downloads\\test\\{sprite.name}.png");
+                // }
             }
         }
     }
