@@ -8,10 +8,11 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-// ReSharper disable StringLiteralTypo
-
 namespace RediveExtract
 {
+    /// <summary>
+    /// Manifest manager - Manipulating manifest files.
+    /// </summary>
     public class Manifest
     {
         private readonly Config _config;
@@ -19,6 +20,12 @@ namespace RediveExtract
         private readonly string _dest;
         private const string ImgServer = "https://img-pc.so-net.tw";
 
+        /// <summary>
+        /// Create a manifest manager reading <paramref name="configFile"/> and save result to <paramref name="dest"/>.
+        /// If config file or destination does not exist, create it.
+        /// </summary>
+        /// <param name="configFile">Path to config file. The file should be in json format.</param>
+        /// <param name="dest">Destination directory to save output.</param>
         public Manifest(FileInfo configFile, string dest)
         {
             _dest = dest;
@@ -41,6 +48,9 @@ namespace RediveExtract
             };
         }
 
+        /// <summary>
+        /// Save all manifests we can found.
+        /// </summary>
         public async Task SaveAllManifests()
         {
             var manifests = await SaveLatestAssetManifest();
@@ -52,7 +62,7 @@ namespace RediveExtract
             tasks.AddRange(ManifestItem
                 .ParseAll(manifests)
                 .Select(assetManifest =>
-                    UpdateManifest(
+                    SaveManifest(
                         _config.ManifestPath() + assetManifest.Uri,
                         CombinePath(assetManifest.Uri),
                         assetManifest.Md5)
@@ -63,9 +73,21 @@ namespace RediveExtract
             tasks.Clear();
         }
 
+        /// <summary>
+        /// Combine given relative path with output path.
+        /// </summary>
+        /// <param name="dest">Path relative to output path.</param>
+        /// <returns>A path with output directory prepended.</returns>
         private string CombinePath(string dest) => Path.Combine(_dest, dest);
 
-        private async Task UpdateManifest(string requestUri, string writePath, string md5Sum)
+        /// <summary>
+        /// Save a manifest file from <paramref name="requestUri"/> to <paramref name="writePath"/>.
+        /// If <paramref name="md5Sum"/> is provided, skip saving if file already exists and checksum matches.
+        /// </summary>
+        /// <param name="requestUri">Remote url to download file from.</param>
+        /// <param name="writePath">Path to write file.</param>
+        /// <param name="md5Sum">MD5 checksum.</param>
+        private async Task SaveManifest(string requestUri, string writePath, string md5Sum)
         {
             if (File.Exists(writePath))
             {
@@ -79,32 +101,51 @@ namespace RediveExtract
             await SaveManifest(requestUri, writePath);
         }
 
+        /// <summary>
+        /// Save latest asset manifest.
+        /// Try to guess latest asset manifest, then save it.
+        /// </summary>
+        /// <returns>A string containing content of manifest.</returns>
         private async Task<string> SaveLatestAssetManifest()
         {
-            var guessArray = new[] {1000, 100, 10, 1};
+            var guessArray = new[] { 1000, 100, 10, 1 };
             var guessTruthVersion = _config.TruthVersion;
             var manifest = await GetAssetManifest(guessTruthVersion);
             Console.WriteLine($":: Saving asset manifest from {guessTruthVersion}.");
 
             foreach (var guessDelta in guessArray)
             {
+                int tmpVersion;
+
                 while (true)
                 {
-                    var tmpVersion = (guessTruthVersion / guessDelta + 1) * guessDelta;
-                    Console.Write($" Gueesing TruthVersion: {tmpVersion}...");
+                    tmpVersion = (guessTruthVersion / guessDelta + 1) * guessDelta;
+                    Console.Write($" Guessing TruthVersion: {tmpVersion}...");
 
                     try
                     {
                         manifest = await GetAssetManifest(tmpVersion);
+                        Console.WriteLine("Yes!");
+                        guessTruthVersion = tmpVersion;
                     }
                     catch (HttpRequestException)
                     {
                         Console.WriteLine("No.");
                         break;
                     }
+                }
 
+                if (tmpVersion % 10 != 0) continue;
+
+                try
+                {
+                    manifest = await GetAssetManifest(tmpVersion);
                     Console.WriteLine("Yes!");
                     guessTruthVersion = tmpVersion;
+                }
+                catch (HttpRequestException)
+                {
+                    Console.WriteLine("No.");
                 }
             }
 
@@ -113,7 +154,10 @@ namespace RediveExtract
             return manifest;
         }
 
-
+        /// <summary>
+        /// Save latest bundle manifest file.
+        /// </summary>
+        /// <returns>A string containing content of manifest.</returns>
         private async Task<string> SaveLatestBundleManifest()
         {
             var manifest = await GetBundleManifest();
@@ -126,21 +170,22 @@ namespace RediveExtract
                 {
                     var tmpVersion = guessVersion.ToArray(); // deep copy
                     tmpVersion[i]++;
-                    
-                    Console.Write($" Gueesing version: {Config.VersionString(tmpVersion)}...");
+                    for (var j = i + 1; j < guessVersion.Length; j++)
+                        tmpVersion[j] = 0;
+
+                    Console.Write($" Guessing version: {Config.VersionString(tmpVersion)}...");
 
                     try
                     {
                         manifest = await GetBundleManifest(tmpVersion);
+                        Console.WriteLine("Yes!");
+                        guessVersion = tmpVersion;
                     }
                     catch (HttpRequestException)
                     {
                         Console.WriteLine("No.");
                         break;
                     }
-
-                    Console.WriteLine("Yes!");
-                    guessVersion = tmpVersion;
                 }
             }
 
@@ -148,7 +193,6 @@ namespace RediveExtract
             _config.Version = guessVersion;
             return manifest;
         }
-
 
         private Task<string> GetAssetManifest(int? truthVersion = null, string locale = null, string os = null) =>
             GetManifest(
