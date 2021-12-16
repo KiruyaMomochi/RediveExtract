@@ -5,6 +5,9 @@ using System.Text.Unicode;
 
 namespace RediveExtract
 {
+    /// <summary>
+    /// Common options for json.
+    /// </summary>
     public static class Json
     {
         public static readonly JsonSerializerOptions Options = new()

@@ -7,6 +7,9 @@ using RediveMediaExtractor;
 
 namespace RediveExtract
 {
+    /// <summary>
+    /// CriWare video or video resources.
+    /// </summary>
     public static class Cri
     {
         public static async Task<List<string>> ExtractUsmFinal(FileInfo source, DirectoryInfo dest)
@@ -18,9 +21,7 @@ namespace RediveExtract
 
             var bins = Video.ExtractUsm(source);
             var taskList = new List<Task>();
-            // ReSharper disable once InconsistentNaming
             var m2vs = new List<string>();
-            // ReSharper disable once IdentifierTypo
             var wavs = new List<string>();
 
             foreach (var bin in bins)
@@ -51,13 +52,12 @@ namespace RediveExtract
                         throw new NotSupportedException(bin);
                 }
             }
-            
+
             res.AddRange(wavs);
             await Task.WhenAll(taskList);
 
             var baseName = Path.Combine(dest.FullName, Path.ChangeExtension(source.Name, null));
 
-            // ReSharper disable once InconsistentNaming
             taskList.AddRange(m2vs.Select(
                 (m2v, i) =>
                 {
@@ -66,19 +66,18 @@ namespace RediveExtract
                         mp4 += ".mp4";
                     else
                         mp4 = $"{mp4}_{i}.mp4";
-                    
+
                     res.Add(mp4);
                     return Video.M2VToMp4(m2v, wavs, mp4);
                 })
             );
             await Task.WhenAll(taskList);
-            
+
             GC.Collect();
             GC.WaitForPendingFinalizers();
             foreach (var bin in bins) File.Delete(bin);
-            
+
             return res;
         }
-
     }
 }

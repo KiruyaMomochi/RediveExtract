@@ -3,17 +3,25 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
-using System.Text.Encodings.Web;
 using System.Text.Json;
-using System.Text.Unicode;
 using AssetStudio;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-namespace RediveExtract
+namespace RediveExtract.Resources
 {
+    /// <summary>
+    /// Const text resource.
+    /// Priconne saves strings in an object, and reference them in other places, like a embedded database.
+    /// </summary>
     public static class ConstText
     {
+        /// <summary>
+        /// Extract text resource from const text file.
+        /// </summary>
+        /// <param name="source">The Unity asset file.</param>
+        /// <param name="json">Export json to given file. If this is null, no export is done.</param>
+        /// <param name="yaml">Export yaml to given file. If this is null, no export is done.</param>
         public static void ExtractConstText(FileInfo source, FileInfo json = null, FileInfo yaml = null)
         {
             var file = Unity3d.LoadAssetFile(source);
