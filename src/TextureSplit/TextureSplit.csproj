@@ -6,11 +6,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\AssetStudio\AssetStudio\AssetStudio.csproj" />
-      <ProjectReference Include="..\AssetStudio\AssetStudioUtility\AssetStudioUtility.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
       <PackageReference Include="Kyaru.AssetStudio" Version="0.16.0" />
       <PackageReference Include="Kyaru.AssetStudio.Texture2DDecoderNative" Version="1.0.1" />
       <PackageReference Include="Kyaru.AssetStudio.Utility" Version="0.16.0" />

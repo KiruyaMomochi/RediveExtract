@@ -13,9 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CriDemuxer\CriFormat\CriFormat.csproj" />
-    <ProjectReference Include="..\HcaConverter\AcbAudio\AcbAudio.csproj" />
-    <ProjectReference Include="..\HcaConverter\HcaAudio\HcaAudio.csproj" />
     <ProjectReference Include="..\RediveUtils\RediveUtils.csproj" />
   </ItemGroup>
 
