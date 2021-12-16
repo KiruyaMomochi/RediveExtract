@@ -38,13 +38,13 @@ jobs:
       working-directory: "./RediveData"
       run: |
         Import-Module ../scripts/ngdive.psm1
-        if ((git status './manifest/masterdata_assetmanifest' -s) -or !(Test-Path db)) {
+        if ((git status './manifest/masterdata2_assetmanifest' -s) -or !(Test-Path db)) {
           echo "::set-output name=database::true"
         }
-        if ((git status './manifest/storydata_assetmanifest' -s) -or !(Test-Path storydata)) {
+        if ((git status './manifest/storydata2_assetmanifest' -s) -or !(Test-Path storydata)) {
           echo "::set-output name=storydata::true"
         }
-        if ((git status './manifest/consttext_assetmanifest' -s) -or !(Test-Path consttext)) {
+        if ((git status './manifest/consttext2_assetmanifest' -s) -or !(Test-Path consttext)) {
           echo "::set-output name=consttext::true"
         }
         git pull

@@ -36,7 +36,7 @@ jobs:
       working-directory: "./RediveData"
       run: |
         Import-Module ../scripts/ngdive.psm1
-        Import-Manifest ./manifest/masterdata_assetmanifest |
+        Import-Manifest ./manifest/masterdata2_assetmanifest |
           Save-AssetItem -OutputDirectory . |
           Expand-AssetItem -Program ${{ github.workspace }}/RediveExtract/RediveExtract.exe -OutputDirectory ./db
     - name: Commit Files

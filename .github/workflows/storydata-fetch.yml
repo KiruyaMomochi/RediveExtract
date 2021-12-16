@@ -34,7 +34,7 @@ jobs:
       working-directory: "./RediveData"
       run: |
         Import-Module ../scripts/ngdive.psm1
-        Get-GitAddLines -Path ./manifest/storydata_assetmanifest -Last 1 |
+        Get-GitAddLines -Path ./manifest/storydata2_assetmanifest -Last 1 |
           ConvertFrom-Manifest |
           Where-Object Path -Like '*storydata_[0-9]*' |
           Save-AssetItem -OutputDirectory . |
