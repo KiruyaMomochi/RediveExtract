@@ -2,17 +2,20 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <NoWarn>$(NoWarn)</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20574.7" />
+    <PackageReference Include="Kyaru.AssetStudio" Version="0.16.0" />
+    <PackageReference Include="Kyaru.AssetStudio.Texture2DDecoderNative" Version="1.0.1" />
+    <PackageReference Include="Kyaru.AssetStudio.Utility" Version="0.16.0" />
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21308.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AssetStudioCore\AssetStudioCore\AssetStudioCore.csproj" />
-    <ProjectReference Include="..\AssetStudioCore\AssetStudioUtility\AssetStudioUtility.csproj" />
+    <ProjectReference Include="..\AssetStudio\AssetStudio\AssetStudio.csproj" />
+    <ProjectReference Include="..\AssetStudio\AssetStudioUtility\AssetStudioUtility.csproj" />
     <ProjectReference Include="..\RediveStoryDeserializer\RediveStoryDeserializer.csproj" />
     <ProjectReference Include="..\RediveVideoExtractor\RediveMediaExtractor.csproj" />
   </ItemGroup>
