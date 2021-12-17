@@ -3,6 +3,14 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>net6.0</TargetFramework>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>Kyaru.Redive.MediaExtractor</PackageId>
+    <Authors>Kiruya Momochi</Authors>
+    <PackageProjectUrl>https://github.com/KiruyaMomochi/RediveExtract</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/KiruyaMomochi/RediveExtract</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
