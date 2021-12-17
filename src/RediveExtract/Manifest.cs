@@ -223,7 +223,7 @@ namespace RediveExtract
         private void SaveBundleManifest(string manifest) =>
             File.WriteAllText(CombinePath("manifest/bdl_assetmanifest"), manifest);
 
-        private Task SaveMovieManifest()
+        private async Task SaveMovieManifest()
         {
             SaveManifest(
                 _config.MoviePath() + "manifest/moviemanifest",
@@ -233,7 +233,7 @@ namespace RediveExtract
                 CombinePath("manifest/movie2manifest"));
         }
 
-        private Task SaveLowMovieManifest()
+        private async Task SaveLowMovieManifest()
         {
             SaveManifest(
                 _config.LowMoviePath() + "manifest/moviemanifest",
