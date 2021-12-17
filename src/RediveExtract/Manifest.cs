@@ -243,12 +243,12 @@ namespace RediveExtract
                 CombinePath("manifest/low_movie2manifest"));
         }
 
-        private Task SaveSoundManifest()
+        private async Task SaveSoundManifest()
         {
-            SaveManifest(
+            await SaveManifest(
                 _config.SoundPath() + "manifest/soundmanifest",
                 CombinePath("manifest/soundmanifest"));
-            SaveManifest(
+            await SaveManifest(
                 _config.SoundPath() + "manifest/sound2manifest",
                 CombinePath("manifest/sound2manifest"));
         }
