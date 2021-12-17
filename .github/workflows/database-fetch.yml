@@ -18,10 +18,10 @@ jobs:
         repository: "KiruyaMomochi/RediveData"
         path: "./RediveData"
         token: ${{ secrets.REDIVEDATA_ACCESS_TOKEN }}
-    - name: Setup .NET Core 5.0.x
+    - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 5.0.x
+        dotnet-version: 6.0.x
     - name: Download RediveExtract
       uses: KiruyaMomochi/download-release@v1
       with:
