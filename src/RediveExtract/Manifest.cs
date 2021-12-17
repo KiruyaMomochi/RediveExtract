@@ -223,17 +223,35 @@ namespace RediveExtract
         private void SaveBundleManifest(string manifest) =>
             File.WriteAllText(CombinePath("manifest/bdl_assetmanifest"), manifest);
 
-        private Task SaveMovieManifest() => SaveManifest(
-            _config.MoviePath() + "manifest/moviemanifest",
-            CombinePath("manifest/moviemanifest"));
+        private Task SaveMovieManifest()
+        {
+            SaveManifest(
+                _config.MoviePath() + "manifest/moviemanifest",
+                CombinePath("manifest/moviemanifest"));
+            SaveManifest(
+                _config.MoviePath() + "manifest/movie2manifest",
+                CombinePath("manifest/movie2manifest"));
+        }
 
-        private Task SaveLowMovieManifest() => SaveManifest(
-            _config.LowMoviePath() + "manifest/moviemanifest",
-            CombinePath("manifest/low_moviemanifest"));
+        private Task SaveLowMovieManifest()
+        {
+            SaveManifest(
+                _config.LowMoviePath() + "manifest/moviemanifest",
+                CombinePath("manifest/low_moviemanifest"));
+            SaveManifest(
+                _config.LowMoviePath() + "manifest/movie2manifest",
+                CombinePath("manifest/low_movie2manifest"));
+        }
 
-        private Task SaveSoundManifest() => SaveManifest(
-            _config.SoundPath() + "manifest/sound2manifest",
-            CombinePath("manifest/sound2manifest"));
+        private Task SaveSoundManifest()
+        {
+            SaveManifest(
+                _config.SoundPath() + "manifest/soundmanifest",
+                CombinePath("manifest/soundmanifest"));
+            SaveManifest(
+                _config.SoundPath() + "manifest/sound2manifest",
+                CombinePath("manifest/sound2manifest"));
+        }
 
         private async Task<string> GetManifest(string requestUri)
         {
