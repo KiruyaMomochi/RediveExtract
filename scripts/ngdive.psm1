@@ -29,6 +29,202 @@ enum LoginBonusType
   ThirdLoginBonu
 }
 
+enum CampaignCategory
+{
+    None
+    HalfStaminaNormal = 11
+    HalfStaminaHard
+    HalfStaminaBoth
+    HalfStaminaUniqueEquip
+    HalfStaminaHighRarityEquip
+    HalfStaminaVeryHard
+    ItemDropRareNormal = 21
+    ItemDropRareHard
+    ItemDropRareBoth
+    ItemDropRareVeryHard
+    ItemDropAmountNormal = 31
+    ItemDropAmountHard
+    ItemDropAmountBoth
+    ItemDropAmountExpTraining
+    ItemDropAmountDungeon
+    ItemDropAmountUniqueEquip = 37
+    ItemDropAmountHighRarityEquip
+    ItemDropAmountVeryHard
+    GoldDropAmountNormal = 41
+    GoldDropAmountHard
+    GoldDropAmountBoth
+    GoldDropAmountGoldTraining
+    GoldDropAmountDungeon
+    GoldDropAmountHighRarityEquip = 48
+    GoldDropAmountVeryHard
+    CoinDropAmountDungeon = 51
+    CoolTimeArena = 61
+    CoolTimeGrandArena
+    ChallengeNumTraining = 71
+    ChallengeNumDungeon
+    ChallengeNumArena
+    ChallengeNumGrandArena
+    PlayerExpAmountNormal = 81
+    PlayerExpAmountHard
+    PlayerExpAmountVeryHard
+    PlayerExpAmountUniqueEquip
+    PlayerExpAmountHighRarityEquip
+    MasterCoinDropTotal = 90
+    MasterCoinDropNormal
+    MasterCoinDropHard
+    MasterCoinDropVeryHard
+    MasterCoinDropUniqueEquip
+    MasterCoinDropHighRarityEquip
+    MasterCoinDropEventNormal
+    MasterCoinDropEventHard
+    MasterCoinDropRevivalNormal
+    MasterCoinDropRevivalHard
+    MasterCoinDropShioriNormal
+    MasterCoinDropShioriHard
+    HalfStaminaHatsuneNormal = 111
+    HalfStaminaHatsuneHard
+    HalfStaminaHatsuneBoth
+    ItemDropRareHatsuneNormal = 121
+    ItemDropRareHatsuneHard
+    ItemDropRareHatsuneBoth
+    ItemDropAmountHatsuneNormal = 131
+    ItemDropAmountHatsuneHard
+    ItemDropAmountHatsuneBoth
+    GoldDropAmountHatsuneNormal = 141
+    GoldDropAmountHatsuneHard
+    GoldDropAmountHatsuneBoth
+    PlayerExpAmountHatsuneNormal = 151
+    PlayerExpAmountHatsuneHard
+    PlayerExpAmountHatsuneBoth
+    HatsuneCategoryMin = 111
+    HatsuneCategoryMax = 153
+    HalfStaminaHatsuneRevivalNormal = 211
+    HalfStaminaHatsuneRevivalHard
+    ItemDropRareHatsuneRevivalNormal = 221
+    ItemDropRareHatsuneRevivalHard
+    ItemDropAmountHatsuneRevivalNormal = 231
+    ItemDropAmountHatsuneRevivalHard
+    GoldDropAmountHatsuneRevivalNormal = 241
+    GoldDropAmountHatsuneRevivalHard
+    PlayerExpAmountHatsuneRevivalNormal = 251
+    PlayerExpAmountHatsuneRevivalHard
+    HatsuneRevivalCategoryMin = 211
+    HatsuneRevivalCategoryMax = 252
+    HalfStaminaShioriNormal = 311
+    HalfStaminaShioriHard
+    ItemDropRareShioriNormal = 321
+    ItemDropRareShioriHard
+    ItemDropAmountShioriNormal = 331
+    ItemDropAmountShioriHard
+    GoldDropAmountShioriNormal = 341
+    GoldDropAmountShioriHard
+    PlayerExpAmountShioriNormal = 351
+    PlayerExpAmountShioriHard
+    ShioriRevivalCategoryMin = 311
+    ShioriRevivalCategoryMax = 352
+}
+
+enum SystemId
+{
+    Error
+    NormalQuest = 101
+    HardQuest
+    SpecialQuest
+    ExpeditionQuest
+    StoryQuest = 106
+    ClanBattle
+    Tower
+    UniqueEquipment
+    Sekai
+    VeryHard
+    HighRarityEquipment
+    Kaiser = 114
+    BulkSkip
+    QuestQuadspeed
+    HatsuneQuestQuadspeed
+    TrainingQuestQuadspeed
+    EquipmentQuestQuadspeed
+    NormalShop = 201
+    ArenaShop
+    GrandArenaShop
+    ExpeditionShop
+    ClanBattleShop
+    LimitedShop
+    MemoryPieceShop
+    GoldShop
+    Jukebox
+    CounterStopShop
+    Arcade
+    NormalGacha = 301
+    RareGacha
+    FestivalGacha
+    StartDashGacha
+    LegendGacha
+    StartPrincessFesGacha
+    LimitedCharaGacha
+    ReturnUserPrincessFesGacha
+    UnitGrowUpGacha
+    NormalArena = 401
+    GrandArena
+    UnitEquip = 501
+    UnitLvup
+    UnitSkillLvup
+    UnitRarityUp
+    UnitStatus
+    UnitEquipEnhance
+    EquipmentDonation
+    UnitGet
+    GrowthBall
+    Room_1F = 601
+    Room_2F
+    Room_3F
+    Clan = 701
+    ClanMemberList
+    Story = 801
+    DataLink = 901
+    Cartoon
+    Vote
+    Friend
+    FriendBattle
+    FriendCampaign
+    FriendManagement
+    CharaExchangeTicket
+    HatsuneTop = 6001
+    HatsuneGacha
+    HatsuneStory
+    HatsuneNormalQuest
+    HatsuneHardQuest
+    HatsuneNormalBoss
+    HatsuneHardBoss
+    HatsuneCommonBoss
+    HatsuneGachaTicketCollection
+    HatsuneVeryHardBoss
+    HatsuneSpecialBoss
+    HatsuneSpecialBossEx
+    UekBoss = 6101
+    HatsuneRevivalTop = 7001
+    HatsuneRevivalGacha
+    HatsuneRevivalStory
+    HatsuneRevivalNormalQuest
+    HatsuneRevivalHardQuest
+    HatsuneRevivalNormalBoss
+    HatsuneRevivalHardBoss
+    HatsuneRevivalCommonBoss
+    HatsuneRevivalGachaTicketCollection
+    HatsuneRevivalVeryHardBoss
+    HatsuneRevivalSpecialBoss
+    HatsuneRevivalSpecialBossEx
+    ShioriEventTop = 8001
+    ShioriEventStory = 8003
+    ShioriEventQuestNormal
+    ShioriEventQuestHard
+    ShioriEventNormalBoss
+    ShioriEventHardBoss
+    ShioriEventCommonBoss
+    ShioriEventVeryHardBoss = 8010
+    InvalidValue = -1
+}
+
 class AssetItem {
   [string] $Md5
   [string] $Path
@@ -74,6 +270,9 @@ function Save-AssetItem {
         
     # Create directory
     EnsureDirectory -Directory (Split-Path $Path)
+
+    # Change path to absolute path so we can use WebClient
+    $Path = Resolve-Path $Path
 
     # Calculate hash prefix
     $HashPre = $MD5.Substring(0, 2)
@@ -245,201 +444,6 @@ function Test-Directory {
   )
   
   return (Get-Item $Path) -is [System.IO.DirectoryInfo]
-}
-
-enum CampaignCategory
-{
-    None
-    HalfStaminaNormal = 11
-    HalfStaminaHard
-    HalfStaminaBoth
-    HalfStaminaUniqueEquip
-    HalfStaminaHighRarityEquip
-    HalfStaminaVeryHard
-    ItemDropRareNormal = 21
-    ItemDropRareHard
-    ItemDropRareBoth
-    ItemDropRareVeryHard
-    ItemDropAmountNormal = 31
-    ItemDropAmountHard
-    ItemDropAmountBoth
-    ItemDropAmountExpTraining
-    ItemDropAmountDungeon
-    ItemDropAmountUniqueEquip = 37
-    ItemDropAmountHighRarityEquip
-    ItemDropAmountVeryHard
-    GoldDropAmountNormal = 41
-    GoldDropAmountHard
-    GoldDropAmountBoth
-    GoldDropAmountGoldTraining
-    GoldDropAmountDungeon
-    GoldDropAmountHighRarityEquip = 48
-    GoldDropAmountVeryHard
-    CoinDropAmountDungeon = 51
-    CoolTimeArena = 61
-    CoolTimeGrandArena
-    ChallengeNumTraining = 71
-    ChallengeNumDungeon
-    ChallengeNumArena
-    ChallengeNumGrandArena
-    PlayerExpAmountNormal = 81
-    PlayerExpAmountHard
-    PlayerExpAmountVeryHard
-    PlayerExpAmountUniqueEquip
-    PlayerExpAmountHighRarityEquip
-    MasterCoinDropTotal = 90
-    MasterCoinDropNormal
-    MasterCoinDropHard
-    MasterCoinDropVeryHard
-    MasterCoinDropUniqueEquip
-    MasterCoinDropHighRarityEquip
-    MasterCoinDropEventNormal
-    MasterCoinDropEventHard
-    MasterCoinDropRevivalNormal
-    MasterCoinDropRevivalHard
-    MasterCoinDropShioriNormal
-    MasterCoinDropShioriHard
-    HalfStaminaHatsuneNormal = 111
-    HalfStaminaHatsuneHard
-    HalfStaminaHatsuneBoth
-    ItemDropRareHatsuneNormal = 121
-    ItemDropRareHatsuneHard
-    ItemDropRareHatsuneBoth
-    ItemDropAmountHatsuneNormal = 131
-    ItemDropAmountHatsuneHard
-    ItemDropAmountHatsuneBoth
-    GoldDropAmountHatsuneNormal = 141
-    GoldDropAmountHatsuneHard
-    GoldDropAmountHatsuneBoth
-    PlayerExpAmountHatsuneNormal = 151
-    PlayerExpAmountHatsuneHard
-    PlayerExpAmountHatsuneBoth
-    HatsuneCategoryMin = 111
-    HatsuneCategoryMax = 153
-    HalfStaminaHatsuneRevivalNormal = 211
-    HalfStaminaHatsuneRevivalHard
-    ItemDropRareHatsuneRevivalNormal = 221
-    ItemDropRareHatsuneRevivalHard
-    ItemDropAmountHatsuneRevivalNormal = 231
-    ItemDropAmountHatsuneRevivalHard
-    GoldDropAmountHatsuneRevivalNormal = 241
-    GoldDropAmountHatsuneRevivalHard
-    PlayerExpAmountHatsuneRevivalNormal = 251
-    PlayerExpAmountHatsuneRevivalHard
-    HatsuneRevivalCategoryMin = 211
-    HatsuneRevivalCategoryMax = 252
-    HalfStaminaShioriNormal = 311
-    HalfStaminaShioriHard
-    ItemDropRareShioriNormal = 321
-    ItemDropRareShioriHard
-    ItemDropAmountShioriNormal = 331
-    ItemDropAmountShioriHard
-    GoldDropAmountShioriNormal = 341
-    GoldDropAmountShioriHard
-    PlayerExpAmountShioriNormal = 351
-    PlayerExpAmountShioriHard
-    ShioriRevivalCategoryMin = 311
-    ShioriRevivalCategoryMax = 352
-}
-enum SystemId
-{
-    Error
-    NormalQuest = 101
-    HardQuest
-    SpecialQuest
-    ExpeditionQuest
-    StoryQuest = 106
-    ClanBattle
-    Tower
-    UniqueEquipment
-    Sekai
-    VeryHard
-    HighRarityEquipment
-    Kaiser = 114
-    BulkSkip
-    QuestQuadspeed
-    HatsuneQuestQuadspeed
-    TrainingQuestQuadspeed
-    EquipmentQuestQuadspeed
-    NormalShop = 201
-    ArenaShop
-    GrandArenaShop
-    ExpeditionShop
-    ClanBattleShop
-    LimitedShop
-    MemoryPieceShop
-    GoldShop
-    Jukebox
-    CounterStopShop
-    Arcade
-    NormalGacha = 301
-    RareGacha
-    FestivalGacha
-    StartDashGacha
-    LegendGacha
-    StartPrincessFesGacha
-    LimitedCharaGacha
-    ReturnUserPrincessFesGacha
-    UnitGrowUpGacha
-    NormalArena = 401
-    GrandArena
-    UnitEquip = 501
-    UnitLvup
-    UnitSkillLvup
-    UnitRarityUp
-    UnitStatus
-    UnitEquipEnhance
-    EquipmentDonation
-    UnitGet
-    GrowthBall
-    Room_1F = 601
-    Room_2F
-    Room_3F
-    Clan = 701
-    ClanMemberList
-    Story = 801
-    DataLink = 901
-    Cartoon
-    Vote
-    Friend
-    FriendBattle
-    FriendCampaign
-    FriendManagement
-    CharaExchangeTicket
-    HatsuneTop = 6001
-    HatsuneGacha
-    HatsuneStory
-    HatsuneNormalQuest
-    HatsuneHardQuest
-    HatsuneNormalBoss
-    HatsuneHardBoss
-    HatsuneCommonBoss
-    HatsuneGachaTicketCollection
-    HatsuneVeryHardBoss
-    HatsuneSpecialBoss
-    HatsuneSpecialBossEx
-    UekBoss = 6101
-    HatsuneRevivalTop = 7001
-    HatsuneRevivalGacha
-    HatsuneRevivalStory
-    HatsuneRevivalNormalQuest
-    HatsuneRevivalHardQuest
-    HatsuneRevivalNormalBoss
-    HatsuneRevivalHardBoss
-    HatsuneRevivalCommonBoss
-    HatsuneRevivalGachaTicketCollection
-    HatsuneRevivalVeryHardBoss
-    HatsuneRevivalSpecialBoss
-    HatsuneRevivalSpecialBossEx
-    ShioriEventTop = 8001
-    ShioriEventStory = 8003
-    ShioriEventQuestNormal
-    ShioriEventQuestHard
-    ShioriEventNormalBoss
-    ShioriEventHardBoss
-    ShioriEventCommonBoss
-    ShioriEventVeryHardBoss = 8010
-    InvalidValue = -1
 }
 
 function Get-ManifestExtraMessage {
