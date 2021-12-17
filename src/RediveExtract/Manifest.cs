@@ -225,20 +225,20 @@ namespace RediveExtract
 
         private async Task SaveMovieManifest()
         {
-            SaveManifest(
+            await SaveManifest(
                 _config.MoviePath() + "manifest/moviemanifest",
                 CombinePath("manifest/moviemanifest"));
-            SaveManifest(
+            await SaveManifest(
                 _config.MoviePath() + "manifest/movie2manifest",
                 CombinePath("manifest/movie2manifest"));
         }
 
         private async Task SaveLowMovieManifest()
         {
-            SaveManifest(
+            await SaveManifest(
                 _config.LowMoviePath() + "manifest/moviemanifest",
                 CombinePath("manifest/low_moviemanifest"));
-            SaveManifest(
+            await SaveManifest(
                 _config.LowMoviePath() + "manifest/movie2manifest",
                 CombinePath("manifest/low_movie2manifest"));
         }
