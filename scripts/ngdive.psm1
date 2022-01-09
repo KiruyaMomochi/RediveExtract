@@ -271,8 +271,8 @@ function Save-AssetItem {
     # Create directory
     EnsureDirectory -Directory (Split-Path $Path)
 
-    # Change path to absolute path so we can use WebClient
-    $Path = Resolve-Path $Path
+    # Set .net current directory so we can use WebClient
+    [System.IO.Directory]::SetCurrentDirectory(((Get-Location -PSProvider FileSystem).ProviderPath))
 
     # Calculate hash prefix
     $HashPre = $MD5.Substring(0, 2)
