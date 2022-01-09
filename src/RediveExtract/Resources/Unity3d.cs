@@ -10,28 +10,28 @@ namespace RediveExtract
 {
     public static class Unity3d
     {
-        public enum ImageType
+        public enum ImageFormat
         {
             Png,
             Webp
         }
 
-        private static string ImageFormat(ImageType type)
+        private static string ImageFormatExtension(ImageFormat format)
         {
-            return type switch
+            return format switch
             {
-                ImageType.Png => "png",
-                ImageType.Webp => "webp",
-                _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+                ImageFormat.Png => "png",
+                ImageFormat.Webp => "webp",
+                _ => throw new ArgumentOutOfRangeException(nameof(format), format, null)
             };
         }
 
         internal static void ExtractUnity3dCommand(FileInfo source, DirectoryInfo dest,
-            ImageType? imageType = null)
+            ImageFormat imageFormat)
         {
             try
             {
-                ExtractUnity3d(source, dest, imageType ?? ImageType.Webp);
+                ExtractUnity3d(source, dest, imageFormat);
             }
             catch (Exception e)
             {
@@ -42,7 +42,7 @@ namespace RediveExtract
         }
 
         public static List<string> ExtractUnity3d(FileInfo source, DirectoryInfo dest,
-            ImageType imageType = ImageType.Webp)
+            ImageFormat imageFormat = ImageFormat.Webp)
         {
             var res = new List<string>();
 
@@ -59,7 +59,7 @@ namespace RediveExtract
                 var file = dic[id];
                 var savePath = Path.Combine(dest.FullName, internalPath ?? "unknown");
 
-                var r = ExtractUnity3dAsset(file, savePath, imageType);
+                var r = ExtractUnity3dAsset(file, savePath, imageFormat);
                 if (r == null)
                     Console.Error.WriteLine($"Ignored {file?.GetType()}: {internalPath}");
                 else
@@ -70,7 +70,7 @@ namespace RediveExtract
         }
 
         private static List<string>? ExtractUnity3dAsset(object file, string savePath,
-            ImageType imageType = ImageType.Webp, bool changeExtension = false)
+            ImageFormat imageFormat = ImageFormat.Webp, bool changeExtension = false)
         {
             var res = new List<string>();
 
@@ -83,9 +83,9 @@ namespace RediveExtract
                     return null;
                 case Texture2D texture2D when !savePath.EndsWith(".ttf"):
                 {
-                    savePath = Path.ChangeExtension(savePath, ImageFormat(imageType));
+                    savePath = Path.ChangeExtension(savePath, ImageFormatExtension(imageFormat));
                     var bitmap = texture2D.ConvertToImage(true);
-
+                    
                     bitmap.Save(savePath);
                     res.Add(savePath);
                     break;
@@ -130,7 +130,7 @@ namespace RediveExtract
                         else
                             mustAppendPathId = true;
 
-                        var innerRes = ExtractUnity3dAsset(f, sp, imageType, true);
+                        var innerRes = ExtractUnity3dAsset(f, sp, imageFormat, true);
                         ;
 
                         if (innerRes == null || innerRes.Count == 0)

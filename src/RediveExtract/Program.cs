@@ -16,103 +16,127 @@ namespace RediveExtract
             var rootCommand = new RootCommand("Redive Extractor\n" +
                                               "Download and extract assets from game Princess Connect! Re:Dive.");
 
+            var configJsonOption = new Option<FileInfo>("--config", "The config.json file.");
+            configJsonOption.AddAlias("-c");
+
+            var input = new Argument<FileInfo>("Input file", "File to be extracted.");
+
+            var outFile = new Option<FileInfo>("--output", "Path to write output file.");
+            outFile.AddAlias("-o");
+
+            var outDirectory = new Option<DirectoryInfo>("--outdir",
+                () => new DirectoryInfo("."), "Directory to write output.");
+            outDirectory.AddAlias("--output");
+            outDirectory.AddAlias("-o");
+
+            var outJson = new Option<FileInfo?>("--json", "Path to write json file.");
+            var outYaml = new Option<FileInfo?>("--yaml", "Path to write yaml file.");
+            var outBinary = new Option<FileInfo?>("--binary", "Path to write binary file.");
+            var outLipsync = new Option<FileInfo?>("--lipsync", "Path to write lipsync file.");
+
+            var outVtt = new Option<FileInfo>("--vtt", "Path to write vtt file.");
+            outVtt.AddAlias("--output");
+            outVtt.AddAlias("-o");
+
+            var imageType = new Option<Unity3d.ImageFormat>("--type", () => Unity3d.ImageFormat.Webp,
+                "The image type to extract.");
+            imageType.AddAlias("-t");
+
+            var intermediateFiles =
+                new Option<bool>("--keep-intermediate", () => false, "Keep intermediate wav files.");
+            intermediateFiles.AddAlias("-k");
+
             var fetch = new Command("fetch", "Fetch latest assets files.")
             {
-                new Option<FileInfo>("--config", "The config.json file."),
-                new Option<string>("--output", "The directory to put the output files.")
+                configJsonOption, outDirectory,
             };
-            fetch.Handler = CommandHandler.Create<FileInfo, string>(DownloadManifests);
+            fetch.SetHandler((FileInfo config, DirectoryInfo output) => DownloadManifests(config, output.FullName),
+                configJsonOption, outDirectory);
             rootCommand.Add(fetch);
 
             var extract = new Command("extract");
 
             var database = new Command("database", "Extract database file from unity3d.")
             {
-                new Option<FileInfo>("--source", "The unity3d asset file."),
-                new Option<FileInfo>("--dest", "Path to the output file.")
+                input, outFile
             };
-            database.Handler = CommandHandler.Create<FileInfo, FileInfo>(Database.ExtractMasterData);
+            database.SetHandler((FileInfo source, FileInfo dest) => Database.ExtractMasterData(source, dest),
+                input, outFile);
             extract.Add(database);
 
             var storyData = new Command("storydata", "Extract story data from unity3d.")
             {
-                new Option<FileInfo>("--source", "The unity3d asset file."),
-                new Option<FileInfo?>("--json", "Path to the output json file"),
-                new Option<FileInfo?>("--yaml", "Path to the output yaml file"),
-                new Option<FileInfo?>("--dest", "Path to the output binary file"),
-                new Option<FileInfo?>("--lipsync", "Path to the output lipsync file")
+                input, outJson, outYaml, outBinary, outLipsync
             };
-            storyData.Handler =
-                CommandHandler.Create<FileInfo, FileInfo, FileInfo, FileInfo, FileInfo>(Story.ExtractStoryData);
+            storyData.SetHandler(
+                (FileInfo source, FileInfo? json, FileInfo? yaml, FileInfo? binary, FileInfo? lipsync) =>
+                    Story.ExtractStoryData(source, json, yaml, binary, lipsync),
+                input, outJson, outYaml, outBinary, outLipsync);
             extract.Add(storyData);
 
             var constText = new Command("consttext", "Extract const text from unity3d.")
             {
-                new Option<FileInfo>("--source", "The unity3d asset file."),
-                new Option<FileInfo>("--json", "Path to the output json file"),
-                new Option<FileInfo>("--yaml", "Path to the output yaml file")
+                input, outJson, outYaml
             };
-            constText.Handler =
-                CommandHandler.Create<FileInfo, FileInfo, FileInfo>(ConstText.ExtractConstText);
+            constText.SetHandler((FileInfo source, FileInfo? json, FileInfo? yaml) =>
+                    ConstText.ExtractConstText(source, json, yaml),
+                input, outJson, outYaml);
             extract.Add(constText);
 
             var usm = new Command("usm", "Extract videos from usm.")
             {
-                new Option<FileInfo>("--source", "The original usm file."),
-                new Option<DirectoryInfo>("--dest", "Path to the output directory."),
+                input, outDirectory, intermediateFiles
             };
-            usm.Handler =
-                CommandHandler.Create<FileInfo, DirectoryInfo>(Cri.ExtractUsmFinal);
+            usm.SetHandler(
+                (FileInfo source, DirectoryInfo output, bool keepWav) => Cri.ExtractUsmFinal(source, output, keepWav),
+                input, outDirectory, intermediateFiles);
             extract.Add(usm);
 
             var hca = new Command("hca", "Extract musics from hca.")
             {
-                new Option<FileInfo>("--source", "The original hca file."),
-                new Option<FileInfo>("--dest", "Path to the output file."),
+                input, outFile
             };
-            hca.Handler =
-                CommandHandler.Create<FileInfo, FileInfo>(Audio.HcaToWav);
+            hca.SetHandler((FileInfo source, FileInfo dest) => Audio.HcaToWav(source, dest),
+                input, outFile);
             extract.Add(hca);
 
             var adx = new Command("adx", "Extract musics from adx.")
             {
-                new Option<FileInfo>("--source", "The original adx file."),
-                new Option<FileInfo>("--dest", "Path to the output file."),
+                input, outFile
             };
-            adx.Handler =
-                CommandHandler.Create<FileInfo, FileInfo>(Audio.AdxToWav);
+            adx.SetHandler((FileInfo source, FileInfo dest) => Audio.AdxToWav(source, dest),
+                input, outFile);
             extract.Add(adx);
 
             var acb = new Command("acb", "Extract musics from acb.")
             {
-                new Option<FileInfo>("--source", "The original acb file."),
-                new Option<DirectoryInfo>("--dest", "Path to the output directory."),
+                input, outDirectory
             };
-            acb.Handler =
-                CommandHandler.Create<FileInfo, DirectoryInfo>(Audio.AcbToWavsCommand);
+            acb.SetHandler((FileInfo source, DirectoryInfo output) => Audio.ExtractAcbCommand(source, output),
+                input, outDirectory);
             extract.Add(acb);
 
             var u3d = new Command("unity3d", "Extract all things in unity3d file.")
             {
-                new Option<FileInfo>("--source", "The original asset file."),
-                new Option<DirectoryInfo>("--dest", "Path to the output directory."),
-                new Option<Unity3d.ImageType>("--image", "The image type to extract."),
+                input, outDirectory, imageType
             };
 
-            u3d.Handler =
-                CommandHandler.Create<FileInfo, DirectoryInfo, Unity3d.ImageType?>(Unity3d.ExtractUnity3dCommand);
+            u3d.SetHandler((FileInfo source, DirectoryInfo output, Unity3d.ImageFormat type) =>
+                    Unity3d.ExtractUnity3dCommand(source, output, type),
+                input, outDirectory, imageType);
 
             extract.Add(u3d);
 
             // TODO: do extract vtt according to MonoBehaviour
             var vtt = new Command("vtt", "Extract vtt from unity3d asset.")
             {
-                new Option<FileInfo>("--source", "The original asset file."),
-                new Option<FileInfo>("--dest", "Path to the output file.")
+                input, outVtt
             };
 
-            vtt.Handler =
-                CommandHandler.Create<FileInfo, FileInfo>(Vtt.ExtractVtt);
+            // vtt.Handler =
+            //     CommandHandler.Create<FileInfo, FileInfo>(Vtt.ExtractVtt);
+            vtt.SetHandler((FileInfo source, FileInfo dest) => Vtt.ExtractVtt(source, dest),
+                input, outVtt);
             extract.Add(vtt);
 
             rootCommand.Add(extract);
