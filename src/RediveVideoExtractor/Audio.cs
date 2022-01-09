@@ -47,7 +47,7 @@ namespace RediveMediaExtractor
         }
 
         // ReSharper disable once IdentifierTypo
-        public static void AcbToWavsCommand(FileInfo source, DirectoryInfo dest)
+        public static void ExtractAcbCommand(FileInfo source, DirectoryInfo dest)
         {
             foreach (var wav in AcbToWavs(source, dest))
                 Console.WriteLine(wav);
@@ -77,9 +77,8 @@ namespace RediveMediaExtractor
                 foreach (var entry in awb.Files)
                 {
                     var record = entry.Value;
-                    var extractFileName = Path.Combine(dest.FullName,
-                        Path.GetFileNameWithoutExtension(source.Name) + $"_{record.CueId:D3}.wav");
-                    
+                    var cueName = acb.Cues.FirstOrDefault(x => x.CueId == record.CueId)?.CueName ?? Path.GetFileNameWithoutExtension(source.Name) + record.CueId.ToString("D3");
+                    var extractFileName = Path.Combine(dest.FullName, cueName + ".wav");
                     var guessAwbFullName = Path.Combine(source.DirectoryName ?? ".", awb.FileName);
 
                     if (source.DirectoryName != null && File.Exists(guessAwbFullName))
