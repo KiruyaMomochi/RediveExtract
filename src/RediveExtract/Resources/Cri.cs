@@ -12,7 +12,7 @@ namespace RediveExtract
     /// </summary>
     public static class Cri
     {
-        public static async Task<List<string>> ExtractUsmFinal(FileInfo source, DirectoryInfo? dest)
+        public static async Task<List<string>> ExtractUsmFinal(FileInfo source, DirectoryInfo? dest, bool keepWav = false)
         {
             var res = new List<string>();
             dest ??= source.Directory;
@@ -53,7 +53,8 @@ namespace RediveExtract
                 }
             }
 
-            res.AddRange(wavs);
+            if (keepWav)
+                res.AddRange(wavs);
             await Task.WhenAll(taskList);
 
             var baseName = Path.Combine(dest.FullName, Path.ChangeExtension(source.Name, null));
@@ -76,6 +77,8 @@ namespace RediveExtract
             GC.Collect();
             GC.WaitForPendingFinalizers();
             foreach (var bin in bins) File.Delete(bin);
+            if (!keepWav)
+                foreach (var wav in wavs) File.Delete(wav);
 
             return res;
         }
