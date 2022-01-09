@@ -77,8 +77,11 @@ namespace RediveMediaExtractor
                 foreach (var entry in awb.Files)
                 {
                     var record = entry.Value;
-                    var cueName = acb.Cues.FirstOrDefault(x => x.CueId == record.CueId)?.CueName ?? Path.GetFileNameWithoutExtension(source.Name) + record.CueId.ToString("D3");
-                    var extractFileName = Path.Combine(dest.FullName, cueName + ".wav");
+                    var cueName = acb.Cues.FirstOrDefault(x => x.CueId == record.CueId)?.CueName;
+                    var fileName = cueName == null
+                        ? Path.GetFileNameWithoutExtension(source.Name) + record.CueId.ToString("D3")
+                        : Path.GetFileNameWithoutExtension(cueName);
+                    var extractFileName = Path.Combine(dest.FullName, fileName + ".wav");
                     var guessAwbFullName = Path.Combine(source.DirectoryName ?? ".", awb.FileName);
 
                     if (source.DirectoryName != null && File.Exists(guessAwbFullName))
