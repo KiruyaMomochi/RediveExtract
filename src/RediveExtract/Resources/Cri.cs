@@ -12,7 +12,7 @@ namespace RediveExtract
     /// </summary>
     public static class Cri
     {
-        public static async Task<List<string>> ExtractUsmFinal(FileInfo source, DirectoryInfo dest)
+        public static async Task<List<string>> ExtractUsmFinal(FileInfo source, DirectoryInfo? dest)
         {
             var res = new List<string>();
             dest ??= source.Directory;

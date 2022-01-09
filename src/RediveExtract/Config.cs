@@ -51,7 +51,7 @@ namespace RediveExtract
         /// var config = new Config();
         /// var requestUri = config.ManifestPath(truthVersion, locale, os) + "manifest/manifest_assetmanifest";
         /// </example>
-        public string ManifestPath(int? truthVersion = null, string locale = null, string os = null)
+        public string ManifestPath(int? truthVersion = null, string? locale = null, string? os = null)
         {
             truthVersion ??= TruthVersion;
             locale ??= Locale;
@@ -71,7 +71,7 @@ namespace RediveExtract
         /// var config = new Config();
         /// var requestUri = config.MoviePath(truthVersion, locale) + "manifest/moviemanifest";
         /// </example>
-        public string MoviePath(int? truthVersion = null, string locale = null)
+        public string MoviePath(int? truthVersion = null, string? locale = null)
         {
             truthVersion ??= TruthVersion;
             locale ??= Locale;
@@ -90,7 +90,7 @@ namespace RediveExtract
         /// var config = new Config();
         /// var requestUri = config.LowMoviePath(truthVersion, locale) + "manifest/moviemanifest";
         /// </example>
-        public string LowMoviePath(int? truthVersion = null, string locale = null)
+        public string LowMoviePath(int? truthVersion = null, string? locale = null)
         {
             truthVersion ??= TruthVersion;
             locale ??= Locale;
@@ -109,7 +109,7 @@ namespace RediveExtract
         /// var config = new Config();
         /// var requestUri = config.SoundPath(truthVersion, locale) + "manifest/sound2manifest";
         /// </example>
-        public string SoundPath(int? truthVersion = null, string locale = null)
+        public string SoundPath(int? truthVersion = null, string? locale = null)
         {
             truthVersion ??= TruthVersion;
             locale ??= Locale;
@@ -129,14 +129,14 @@ namespace RediveExtract
         /// var config = new Config();
         /// var requestUri = config.BundlesPath(version, locale, os) + "manifest/bdl_assetmanifest“;
         /// </example>
-        public string BundlesPath(int[] version = null, string locale = null, string os = null)
+        public string BundlesPath(int[]? version = null, string? locale = null, string? os = null)
         {
             version ??= Version;
             locale ??= Locale;
             os ??= OS;
 
             var versionString = VersionString(version);
-            return $"dl/Bundles/{versionString}/{locale}/AssetBundles/{os}/";;
+            return $"dl/Bundles/{versionString}/{locale}/AssetBundles/{os}/";
         }
     }
 }

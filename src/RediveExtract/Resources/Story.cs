@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -11,9 +10,9 @@ namespace RediveExtract
 {
     public static class Story
     {
-        public static void ExtractStoryData(FileInfo source, FileInfo json = null, FileInfo yaml = null,
-            FileInfo dest = null,
-            FileInfo lipsync = null)
+        public static void ExtractStoryData(FileInfo source, FileInfo? json = null, FileInfo? yaml = null,
+            FileInfo? dest = null,
+            FileInfo? lipsync = null)
         {
             var file = Unity3d.LoadAssetFile(source);
 
@@ -23,7 +22,7 @@ namespace RediveExtract
                 var textBuffer = textFile.m_Script;
                 var textName = textFile.m_Name;
 
-                List<Command> commands = null;
+                List<Command>? commands = null;
 
                 Console.WriteLine(textName);
 
@@ -35,7 +34,7 @@ namespace RediveExtract
 
                 if (json != null)
                 {
-                    commands = Deserializer.Deserialize(textBuffer);
+                    commands ??= Deserializer.Deserialize(textBuffer);
                     using var fj = json.Create();
                     fj.Write(commands.ToUtf8Json());
                 }
@@ -53,7 +52,7 @@ namespace RediveExtract
             }
 
             if (lipsync == null) return;
-            
+
             try
             {
                 var ls = file.Objects.OfType<MonoBehaviour>().First().ToType();

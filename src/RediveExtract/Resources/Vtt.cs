@@ -26,7 +26,7 @@ namespace RediveExtract
 
             foreach (OrderedDictionary rec in records)
             {
-                df.WriteLine($"{ConvertTime(rec["startTime"])} --> {ConvertTime(rec["endTime"])}");
+                df.WriteLine($"{ConvertTime(rec["startTime"] ?? 0f)} --> {ConvertTime(rec["endTime"] ?? 0f)}");
                 df.WriteLine(rec["text"]);
                 df.WriteLine();
             }

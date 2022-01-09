@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -34,7 +33,7 @@ namespace RediveExtract
             try
             {
                 using var fs = configFile.OpenText();
-                _config = JsonSerializer.Deserialize<Config>(fs.ReadToEnd());
+                _config = JsonSerializer.Deserialize<Config>(fs.ReadToEnd()) ?? new Config();
             }
             catch (Exception)
             {
@@ -194,11 +193,11 @@ namespace RediveExtract
             return manifest;
         }
 
-        private Task<string> GetAssetManifest(int? truthVersion = null, string locale = null, string os = null) =>
+        private Task<string> GetAssetManifest(int? truthVersion = null, string? locale = null, string? os = null) =>
             GetManifest(
                 _config.ManifestPath(truthVersion, locale, os) + "manifest/manifest_assetmanifest");
 
-        private Task SaveAssetManifest(int? truthVersion = null, string locale = null, string os = null) =>
+        private Task SaveAssetManifest(int? truthVersion = null, string? locale = null, string? os = null) =>
             SaveManifest(
                 _config.ManifestPath(truthVersion, locale, os) + "manifest/manifest_assetmanifest",
                 CombinePath("manifest/manifest_assetmanifest"));
@@ -212,7 +211,7 @@ namespace RediveExtract
             File.WriteAllText(path, manifest);
         }
 
-        private Task<string> GetBundleManifest(int[] version = null, string locale = null, string os = null) =>
+        private Task<string> GetBundleManifest(int[]? version = null, string? locale = null, string? os = null) =>
             GetManifest(
                 _config.BundlesPath(version, locale, os) + "manifest/bdl_assetmanifest");
 
@@ -248,8 +247,8 @@ namespace RediveExtract
             Console.WriteLine($"- {requestUri}");
             var m = await _client.GetAsync(requestUri);
             m.EnsureSuccessStatusCode();
-            using var writeStream = File.OpenWrite(writePath);
-            using var manifests = await m.Content.ReadAsStreamAsync();
+            await using var writeStream = File.OpenWrite(writePath);
+            await using var manifests = await m.Content.ReadAsStreamAsync();
             await manifests.CopyToAsync(writeStream);
         }
 

@@ -16,7 +16,7 @@ namespace RediveExtract
         /// <param name="source">The asset file containing database.</param>
         /// <param name="dest">Destination to save file. Default to master.bytes.</param>
         /// <exception cref="NotSupportedException">Bundle is not AssetBundle.</exception>
-        public static void ExtractMasterData(FileInfo source, FileInfo dest = null)
+        public static void ExtractMasterData(FileInfo source, FileInfo? dest = null)
         {
             var am = new AssetsManager();
             am.LoadFiles(source.FullName);

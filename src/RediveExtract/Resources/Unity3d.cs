@@ -1,9 +1,7 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
-using System.Linq;
 using System.Text.Json;
 using AssetStudio;
 using SixLabors.ImageSharp;
@@ -12,11 +10,28 @@ namespace RediveExtract
 {
     public static class Unity3d
     {
-        internal static void ExtractUnity3dCommand(FileInfo source, DirectoryInfo dest)
+        public enum ImageType
+        {
+            Png,
+            Webp
+        }
+
+        private static string ImageFormat(ImageType type)
+        {
+            return type switch
+            {
+                ImageType.Png => "png",
+                ImageType.Webp => "webp",
+                _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+            };
+        }
+
+        internal static void ExtractUnity3dCommand(FileInfo source, DirectoryInfo dest,
+            ImageType? imageType = null)
         {
             try
             {
-                ExtractUnity3d(source, dest);
+                ExtractUnity3d(source, dest, imageType ?? ImageType.Webp);
             }
             catch (Exception e)
             {
@@ -25,11 +40,12 @@ namespace RediveExtract
                 Console.Error.WriteLine(e);
             }
         }
-        
-        public static List<string> ExtractUnity3d(FileInfo source, DirectoryInfo dest)
+
+        public static List<string> ExtractUnity3d(FileInfo source, DirectoryInfo dest,
+            ImageType imageType = ImageType.Webp)
         {
             var res = new List<string>();
-            
+
             var am = new AssetsManager();
             am.LoadFiles(source.FullName);
             var dic = am.assetsFileList[0].ObjectsDic;
@@ -43,7 +59,7 @@ namespace RediveExtract
                 var file = dic[id];
                 var savePath = Path.Combine(dest.FullName, internalPath ?? "unknown");
 
-                var r = ExtractUnity3dAsset(file, savePath);
+                var r = ExtractUnity3dAsset(file, savePath, imageType);
                 if (r == null)
                     Console.Error.WriteLine($"Ignored {file?.GetType()}: {internalPath}");
                 else
@@ -53,10 +69,11 @@ namespace RediveExtract
             return res;
         }
 
-        private static List<string> ExtractUnity3dAsset(object file, string savePath, bool changeExtension = false)
+        private static List<string>? ExtractUnity3dAsset(object file, string savePath,
+            ImageType imageType = ImageType.Webp, bool changeExtension = false)
         {
             var res = new List<string>();
-            
+
             var saveDir = Path.GetDirectoryName(savePath);
             if (saveDir != null) Directory.CreateDirectory(saveDir);
 
@@ -66,10 +83,10 @@ namespace RediveExtract
                     return null;
                 case Texture2D texture2D when !savePath.EndsWith(".ttf"):
                 {
-                    if (changeExtension)
-                        savePath = Path.ChangeExtension(savePath, "png");
+                    savePath = Path.ChangeExtension(savePath, ImageFormat(imageType));
                     var bitmap = texture2D.ConvertToImage(true);
-                    bitmap.SaveAsPng(savePath);
+
+                    bitmap.Save(savePath);
                     res.Add(savePath);
                     break;
                 }
@@ -102,22 +119,25 @@ namespace RediveExtract
                 {
                     var newPath = Path.ChangeExtension(savePath, null);
                     var mustAppendPathId = false;
-                    
+
                     foreach (var component in gameObject.m_Components)
                     {
                         var f = gameObject.assetsFile.ObjectsDic[component.m_PathID];
                         var sp = newPath;
-                        
+
                         if (f is not MonoBehaviour || mustAppendPathId)
                             sp = newPath + "_" + component.m_PathID;
                         else
                             mustAppendPathId = true;
-                        
-                        var innerRes = ExtractUnity3dAsset(f, sp, true);;
-                        
-                        if (innerRes == null || innerRes.Count == 0) Console.Error.WriteLine($"Ignored {f?.GetType()} :{component.m_PathID}");
+
+                        var innerRes = ExtractUnity3dAsset(f, sp, imageType, true);
+                        ;
+
+                        if (innerRes == null || innerRes.Count == 0)
+                            Console.Error.WriteLine($"Ignored {f?.GetType()} :{component.m_PathID}");
                         else res.AddRange(innerRes);
                     }
+
                     break;
                 }
                 default:

@@ -37,10 +37,10 @@ namespace RediveExtract
             var storyData = new Command("storydata", "Extract story data from unity3d.")
             {
                 new Option<FileInfo>("--source", "The unity3d asset file."),
-                new Option<FileInfo>("--json", "Path to the output json file"),
-                new Option<FileInfo>("--yaml", "Path to the output yaml file"),
-                new Option<FileInfo>("--dest", "Path to the output binary file"),
-                new Option<FileInfo>("--lipsync", "Path to the output lipsync file")
+                new Option<FileInfo?>("--json", "Path to the output json file"),
+                new Option<FileInfo?>("--yaml", "Path to the output yaml file"),
+                new Option<FileInfo?>("--dest", "Path to the output binary file"),
+                new Option<FileInfo?>("--lipsync", "Path to the output lipsync file")
             };
             storyData.Handler =
                 CommandHandler.Create<FileInfo, FileInfo, FileInfo, FileInfo, FileInfo>(Story.ExtractStoryData);
@@ -95,11 +95,12 @@ namespace RediveExtract
             var u3d = new Command("unity3d", "Extract all things in unity3d file.")
             {
                 new Option<FileInfo>("--source", "The original asset file."),
-                new Option<DirectoryInfo>("--dest", "Path to the output directory.")
+                new Option<DirectoryInfo>("--dest", "Path to the output directory."),
+                new Option<Unity3d.ImageType>("--image", "The image type to extract."),
             };
 
             u3d.Handler =
-                CommandHandler.Create<FileInfo, DirectoryInfo>(Unity3d.ExtractUnity3dCommand);
+                CommandHandler.Create<FileInfo, DirectoryInfo, Unity3d.ImageType?>(Unity3d.ExtractUnity3dCommand);
 
             extract.Add(u3d);
 
@@ -118,7 +119,7 @@ namespace RediveExtract
             rootCommand.InvokeAsync(args).Wait();
         }
 
-        private static async Task DownloadManifests(FileInfo config = null, string output = ".")
+        private static async Task DownloadManifests(FileInfo? config = null, string output = ".")
         {
             config ??= new FileInfo("config.json");
 
