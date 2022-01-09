@@ -346,40 +346,40 @@ function Expand-AssetItem {
 
     switch ($Type) {
       ([AssetTypes]::Usm) {
-        & $Program extract usm --source $Path --dest $OutputDirectoryFull
+        & $Program extract usm $Path --outdir $OutputDirectoryFull
         Get-ChildItem "$OutputDirectoryFull/*.wav" | ConvertAudio
         $exportFiles = $OutputDirectory
       }
       ([AssetTypes]::Acb) {
-        & $Program extract acb --source $Path --dest $OutputDirectoryFull
+        & $Program extract acb $Path --outdir $OutputDirectoryFull
         Get-ChildItem "$OutputDirectoryFull/*.wav" | ConvertAudio
         $exportFiles = $OutputDirectory
       }
       ([AssetTypes]::Unity3D) {
-        $exportFiles = & $Program extract unity3d --source $Path --dest $OutputDirectoryFull
+        $exportFiles = & $Program extract unity3d $Path --outdir $OutputDirectoryFull
       }
       ([AssetTypes]::Subtitle) {
         $BaseName = $BaseName.Replace('storydata_', '')
         $dest = Join-Path $OutputDirectoryFull "$BaseName.vtt"
-        & $Program extract vtt --source $Path --dest $dest
+        & $Program extract vtt $Path --output $dest
         $exportFiles = $dest
       }
       ([AssetTypes]::StoryData) {
         $BaseName = $BaseName.Replace('storydata_', '')
         $json = Join-Path $OutputDirectoryFull "json/$BaseName.json"
         $yaml = Join-Path $OutputDirectoryFull "yaml/$BaseName.yaml"
-        & $Program extract storydata --source $Path --json $json --yaml $yaml
+        & $Program extract storydata $Path --json $json --yaml $yaml
       }
       ([AssetTypes]::ConstText) {
         $BaseName = $BaseName.Replace('consttext_', '')
         $json = Join-Path $OutputDirectoryFull "$BaseName.json"
         $yaml = Join-Path $OutputDirectoryFull "$BaseName.yaml"
-        & $Program extract consttext --source $Path --json $json --yaml $yaml
+        & $Program extract consttext $Path --json $json --yaml $yaml
       }
       ([AssetTypes]::Database) {
         $db = Join-Path $OutputDirectoryFull "$BaseName.sqlite"
       
-        & $Program extract database --source $Path --dest $db
+        & $Program extract database $Path --output $db
         $tables = sqlite3 $db "SELECT tbl_name FROM sqlite_master WHERE type='table' and tbl_name not like 'sqlite_%'"
 
         $OutputDirectoryFull = $OutputDirectoryFull.Replace("\", "/")
