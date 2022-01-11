@@ -7,6 +7,8 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Unicode;
 using System.Threading.Tasks;
+using RediveUtils;
+using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -62,7 +64,7 @@ namespace RediveStoryDeserializer
         public static string ToReadableYaml(this IEnumerable<Command> commands)
         {
             _serializer ??= new SerializerBuilder()
-                .WithNamingConvention(CamelCaseNamingConvention.Instance)
+                .WithEventEmitter(next => new LiteralMultilineEmitter(next))
                 .Build();
             var dict = commands.Select(x => x.ToDict()).Where(x => x != null);
             return _serializer.Serialize(dict);

@@ -5,7 +5,11 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using AssetStudio;
+using RediveExtract.Generated;
+using RediveUtils;
+using YamlDotNet.Core;
 using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.EventEmitters;
 using YamlDotNet.Serialization.NamingConventions;
 
 namespace RediveExtract.Resources
@@ -14,8 +18,14 @@ namespace RediveExtract.Resources
     /// Const text resource.
     /// Priconne saves strings in an object, and reference them in other places, like a embedded database.
     /// </summary>
-    public static class ConstText
+    public static class ConstTextResource
     {
+        public class ConstText
+        {
+            public string? Name { get; set; }
+            public string Value { get; set; } = "";
+        }
+
         /// <summary>
         /// Extract text resource from const text file.
         /// </summary>
@@ -24,7 +34,7 @@ namespace RediveExtract.Resources
         /// <param name="yaml">Export yaml to given file. If this is null, no export is done.</param>
         public static void ExtractConstText(FileInfo source, FileInfo? json = null, FileInfo? yaml = null)
         {
-            var file = Unity3d.LoadAssetFile(source);
+            var file = Unity3dResource.LoadAssetFile(source);
             var ls = file.Objects.OfType<MonoBehaviour>().First().ToType();
             var data = ls["dataArray"];
 
@@ -33,7 +43,7 @@ namespace RediveExtract.Resources
                 Console.Error.WriteLine($"Invalid dataArray type {data?.GetType()}.");
                 return;
             }
-            
+
             if (json != null)
             {
                 using var fs = json.Create();
@@ -42,20 +52,24 @@ namespace RediveExtract.Resources
 
             if (yaml != null)
             {
-                var dict = new Dictionary<int, string>();
+                var dict = new Dictionary<int, ConstText>();
                 list.ForEach(x =>
                 {
                     if (x is OrderedDictionary od && od["TextId"] is int id && od["TextString"] is string str)
                     {
-                        dict.Add(id, str);
+                        str = str.Replace("\\n", "\n");
+                        var textId = (TextId)id;
+                        dict.Add(id,
+                            new ConstText
+                                { Name = Enum.IsDefined(textId) ? textId.ToString() : null, Value = str });
                     }
                 });
-                
+
                 using var fy = yaml.CreateText();
-                new SerializerBuilder()
-                    .WithNamingConvention(CamelCaseNamingConvention.Instance)
-                    .Build()
-                    .Serialize(fy, dict);
+                var serializer = new SerializerBuilder()
+                    .WithEventEmitter(next => new LiteralMultilineEmitter(next))
+                    .Build();
+                serializer.Serialize(fy, dict);
             }
         }
     }

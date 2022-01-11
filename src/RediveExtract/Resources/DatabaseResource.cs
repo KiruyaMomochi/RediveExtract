@@ -2,13 +2,13 @@
 using System.IO;
 using AssetStudio;
 
-namespace RediveExtract
+namespace RediveExtract.Resources
 {
     /// <summary>
     /// Master data resource.
     /// Assume the database is in SQLite format. Encrypted database is not supported yet.
     /// </summary>
-    internal static class Database
+    internal static class DatabaseResource
     {
         /// <summary>
         /// Extract master database from source.

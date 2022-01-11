@@ -5,12 +5,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using RediveMediaExtractor;
 
-namespace RediveExtract
+namespace RediveExtract.Resources
 {
     /// <summary>
     /// CriWare video or video resources.
     /// </summary>
-    public static class Cri
+    public static class CriResource
     {
         public static async Task<List<string>> ExtractUsmFinal(FileInfo source, DirectoryInfo? dest, bool keepWav = false)
         {

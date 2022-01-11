@@ -6,15 +6,15 @@ using System.Text.Json;
 using AssetStudio;
 using RediveStoryDeserializer;
 
-namespace RediveExtract
+namespace RediveExtract.Resources
 {
-    public static class Story
+    public static class StoryResource
     {
         public static void ExtractStoryData(FileInfo source, FileInfo? json = null, FileInfo? yaml = null,
             FileInfo? dest = null,
             FileInfo? lipsync = null)
         {
-            var file = Unity3d.LoadAssetFile(source);
+            var file = Unity3dResource.LoadAssetFile(source);
 
             try
             {

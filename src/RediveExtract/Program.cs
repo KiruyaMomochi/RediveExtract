@@ -38,7 +38,7 @@ namespace RediveExtract
             outVtt.AddAlias("--output");
             outVtt.AddAlias("-o");
 
-            var imageType = new Option<Unity3d.ImageFormat>("--type", () => Unity3d.ImageFormat.Webp,
+            var imageType = new Option<Unity3dResource.ImageFormat>("--type", () => Unity3dResource.ImageFormat.Webp,
                 "The image type to extract.");
             imageType.AddAlias("-t");
 
@@ -60,7 +60,7 @@ namespace RediveExtract
             {
                 input, outFile
             };
-            database.SetHandler((FileInfo source, FileInfo dest) => Database.ExtractMasterData(source, dest),
+            database.SetHandler((FileInfo source, FileInfo dest) => DatabaseResource.ExtractMasterData(source, dest),
                 input, outFile);
             extract.Add(database);
 
@@ -70,7 +70,7 @@ namespace RediveExtract
             };
             storyData.SetHandler(
                 (FileInfo source, FileInfo? json, FileInfo? yaml, FileInfo? binary, FileInfo? lipsync) =>
-                    Story.ExtractStoryData(source, json, yaml, binary, lipsync),
+                    StoryResource.ExtractStoryData(source, json, yaml, binary, lipsync),
                 input, outJson, outYaml, outBinary, outLipsync);
             extract.Add(storyData);
 
@@ -79,7 +79,7 @@ namespace RediveExtract
                 input, outJson, outYaml
             };
             constText.SetHandler((FileInfo source, FileInfo? json, FileInfo? yaml) =>
-                    ConstText.ExtractConstText(source, json, yaml),
+                    ConstTextResource.ExtractConstText(source, json, yaml),
                 input, outJson, outYaml);
             extract.Add(constText);
 
@@ -88,7 +88,7 @@ namespace RediveExtract
                 input, outDirectory, intermediateFiles
             };
             usm.SetHandler(
-                (FileInfo source, DirectoryInfo output, bool keepWav) => Cri.ExtractUsmFinal(source, output, keepWav),
+                (FileInfo source, DirectoryInfo output, bool keepWav) => CriResource.ExtractUsmFinal(source, output, keepWav),
                 input, outDirectory, intermediateFiles);
             extract.Add(usm);
 
@@ -121,8 +121,8 @@ namespace RediveExtract
                 input, outDirectory, imageType
             };
 
-            u3d.SetHandler((FileInfo source, DirectoryInfo output, Unity3d.ImageFormat type) =>
-                    Unity3d.ExtractUnity3dCommand(source, output, type),
+            u3d.SetHandler((FileInfo source, DirectoryInfo output, Unity3dResource.ImageFormat type) =>
+                    Unity3dResource.ExtractUnity3dCommand(source, output, type),
                 input, outDirectory, imageType);
 
             extract.Add(u3d);
@@ -135,7 +135,7 @@ namespace RediveExtract
 
             // vtt.Handler =
             //     CommandHandler.Create<FileInfo, FileInfo>(Vtt.ExtractVtt);
-            vtt.SetHandler((FileInfo source, FileInfo dest) => Vtt.ExtractVtt(source, dest),
+            vtt.SetHandler((FileInfo source, FileInfo dest) => VttResource.ExtractVtt(source, dest),
                 input, outVtt);
             extract.Add(vtt);
 

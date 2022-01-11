@@ -5,9 +5,9 @@ using System.IO;
 using System.Linq;
 using AssetStudio;
 
-namespace RediveExtract
+namespace RediveExtract.Resources
 {
-    public static class Vtt
+    public static class VttResource
     {
         public static void ExtractVtt(FileInfo source, FileInfo dest)
         {

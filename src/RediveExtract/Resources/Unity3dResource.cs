@@ -6,9 +6,9 @@ using System.Text.Json;
 using AssetStudio;
 using SixLabors.ImageSharp;
 
-namespace RediveExtract
+namespace RediveExtract.Resources
 {
-    public static class Unity3d
+    public static class Unity3dResource
     {
         public enum ImageFormat
         {
