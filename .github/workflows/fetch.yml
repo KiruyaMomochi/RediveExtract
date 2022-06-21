@@ -39,4 +39,6 @@ jobs:
         run: Expand-Archive ./RediveExtract.zip
       - name: Run
         working-directory: "./RediveData"
-        run: ../scripts/update.ps1 -Program ${{ github.workspace }}/RediveExtract/RediveExtract.exe
+        run: |
+          ../scripts/update.ps1 -Program ${{ github.workspace }}/RediveExtract/RediveExtract.exe
+          git push
