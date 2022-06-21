@@ -127,6 +127,9 @@ public static class ManifestConsts
     public const string SoundManifest = "manifest/soundmanifest";
     public const string Sound2Manifest = "manifest/sound2manifest";
     public const string AssetManifest = "manifest/manifest_assetmanifest";
+    
+    public const string LowMovieDest = "manifest/low_moviemanifest";
+    public const string LowMovie2Dest = "manifest/low_movie2manifest";
 
     public static string TruthVersionString(this Config c) => ManifestConsts.TruthVersionString(c.TruthVersion);
     public static string VersionString(this Config c) => ManifestConsts.VersionString(c.Version);
@@ -149,7 +152,7 @@ public static class ManifestConsts
         _ => throw new ArgumentException($"Unknown manifest type: {manifest}")
     };
     
-    public static string ManifestPath(this Config c, ManifestFile manifest) => manifest switch
+    public static string ManifestPath(ManifestFile manifest) => manifest switch
     {
         ManifestFile.Bundle => BundleManifest,
         ManifestFile.Movie => MovieManifest,
@@ -161,7 +164,14 @@ public static class ManifestConsts
         ManifestFile.Asset => AssetManifest,
         _ => throw new ArgumentException($"Unknown manifest type: {manifest}")
     };
-    
+
+    public static string ManifestDest(ManifestFile manifest) => manifest switch
+    {
+        ManifestFile.LowMovie => LowMovieDest,
+        ManifestFile.LowMovie2 => LowMovie2Dest,
+        _ => ManifestPath(manifest)
+    };
+
     public static string ManifestUri(this Config c, ManifestFile manifest) 
-        => c.Endpoint(manifest) + c.ManifestPath(manifest);
+        => c.Endpoint(manifest) + ManifestPath(manifest);
 }

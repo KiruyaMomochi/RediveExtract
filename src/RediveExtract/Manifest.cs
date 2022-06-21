@@ -75,6 +75,7 @@ namespace RediveExtract
                     SaveManifestIfNotExist(
                         _config.AssetEndpoint(),
                         assetManifest.Uri,
+                        assetManifest.Uri,
                         assetManifest.Md5)
                 )
             );
@@ -303,11 +304,9 @@ namespace RediveExtract
         private Task SaveManifest(ManifestFile manifestFile) =>
             SaveManifest(
                 _config.Endpoint(manifestFile),
-                _config.ManifestPath(manifestFile)
+                ManifestPath(manifestFile),
+                ManifestDest(manifestFile)
             );
-
-        private Task SaveManifest(string requestEndpoint, string path)
-            => SaveManifest(requestEndpoint, path, CombinePath(path));
 
         /// <summary>
         /// Save a manifest file from <paramref name="requestEndpoint"/>/<paramref name="requestPath"/> to
@@ -336,11 +335,9 @@ namespace RediveExtract
         private Task SaveManifestIfNotExist(ManifestFile manifestFile, string md5Sum)
             => SaveManifestIfNotExist(
                 _config.Endpoint(manifestFile),
-                _config.ManifestPath(manifestFile),
+                ManifestPath(manifestFile),
+                ManifestDest(manifestFile),
                 md5Sum);
-
-        private Task SaveManifestIfNotExist(string requestEndpoint, string path, string md5Sum)
-            => SaveManifestIfNotExist(requestEndpoint, path, CombinePath(path), md5Sum);
 
         public void SaveConfig(FileInfo configFile)
         {
