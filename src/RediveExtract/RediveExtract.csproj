@@ -16,10 +16,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Kyaru.AssetStudio" Version="0.16.0" />
-    <PackageReference Include="Kyaru.AssetStudio.Texture2DDecoderNative" Version="1.0.1" />
-    <PackageReference Include="Kyaru.AssetStudio.Utility" Version="0.16.0" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="2.0.0-alpha.0.150" />
+    <PackageReference Include="Kyaru.AssetStudio" Version="0.16.47" />
+    <PackageReference Include="Kyaru.Texture2DDecoder" Version="0.16.40" />
+    <PackageReference Include="Kyaru.Texture2DDecoder.Linux" Version="0.1.0" />
+    <PackageReference Include="Kyaru.Texture2DDecoder.Windows" Version="0.1.0" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="2.1.3" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta2.21617.1" />
   </ItemGroup>
 

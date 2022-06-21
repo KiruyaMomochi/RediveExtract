@@ -14,9 +14,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Kyaru.AssetStudio" Version="0.16.0" />
-    <PackageReference Include="Kyaru.AssetStudio.Texture2DDecoderNative" Version="1.0.1" />
-    <PackageReference Include="Kyaru.AssetStudio.Utility" Version="0.16.0" />
+    <PackageReference Include="Kyaru.AssetStudio" Version="0.16.47" />
+    <PackageReference Include="Kyaru.AssetStudioUtility" Version="0.16.47" />
   </ItemGroup>
 
 </Project>

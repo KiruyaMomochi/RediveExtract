@@ -14,9 +14,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="DereTore.Common" Version="1.0.0" />
+    <PackageReference Include="DereTore.Exchange.Archive.ACB" Version="1.0.0.1" />
+    <PackageReference Include="DereTore.Exchange.Audio.HCA" Version="1.0.0.1" />
+    <PackageReference Include="Kyaru.AssetStudioUtility" Version="0.16.47" />
     <PackageReference Include="Kyaru.CriDemuxer.CriFormat" Version="1.0.0" />
-    <PackageReference Include="Kyaru.HcaConverter.AcbAudio" Version="1.0.0" />
-    <PackageReference Include="Kyaru.HcaConverter.HcaAudio" Version="1.0.0" />
     <PackageReference Include="VGAudio" Version="2.2.1" />
   </ItemGroup>
 
