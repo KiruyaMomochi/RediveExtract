@@ -1,6 +1,6 @@
 # RediveExtract
 
-![Fetch Latest Manifests](https://github.com/KiruyaMomochi/RediveExtract/workflows/Fetch%20Latest%20Manifests/badge.svg)
+[![Fetch Latest Data](https://github.com/KiruyaMomochi/RediveExtract/actions/workflows/fetch.yml/badge.svg?event=schedule)](https://github.com/KiruyaMomochi/RediveExtract/actions/workflows/fetch.yml)
 
 Fetch and extract 超異域公主連結☆Re：Dive resources automaticly using GitHub Actions.
 
