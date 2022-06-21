@@ -1,0 +1,41 @@
+name: Fetch Latest Data
+
+on:
+  # schedule:
+  #   - cron: 0 * * * *
+  workflow_dispatch:
+    
+defaults:
+  run:
+    shell: pwsh
+
+jobs:
+  fetch:
+    runs-on: windows-latest
+    
+    steps:
+      - uses: actions/checkout@v2
+      - name: Checkout RediveData
+        uses: actions/checkout@v2
+        with:
+          repository: "KiruyaMomochi/RediveData"
+          path: "./RediveData"
+          token: ${{ secrets.REDIVEDATA_ACCESS_TOKEN }}
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x
+      - name: Install sqlite
+        run: |
+          choco install sqlite
+      - name: Download RediveExtract
+        uses: dsaltares/fetch-gh-release-asset@master
+        with:
+          repo: 'KiruyaMomochi/RediveExtract'
+          file: 'RediveExtract.zip'
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract RediveExtract
+        run: Expand-Archive ./RediveExtract.zip
+      - name: Run
+        working-directory: "./RediveData"
+        run: ../scripts/update.ps1 -Program ${{ github.workspace }}/RediveExtract/RediveExtract.exe
