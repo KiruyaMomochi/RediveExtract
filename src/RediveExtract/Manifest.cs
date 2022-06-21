@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Threading.Tasks;
+using static RediveExtract.ManifestConsts;
 
 namespace RediveExtract
 {
@@ -15,9 +17,11 @@ namespace RediveExtract
     public class Manifest
     {
         private readonly Config _config;
-        private readonly HttpClient _client;
         private readonly string _dest;
-        private const string ImgServer = "https://img-pc.so-net.tw";
+        private readonly int[] _guessArray = { 1, 10, 11, 100, 101, 1000, 1001, 10000, 10001 };
+        public const string ImgServer = "https://img-pc.so-net.tw";
+
+        public HttpClient Client { private get; set; }
 
         /// <summary>
         /// Create a manifest manager reading <paramref name="configFile"/> and save result to <paramref name="dest"/>.
@@ -25,10 +29,11 @@ namespace RediveExtract
         /// </summary>
         /// <param name="configFile">Path to config file. The file should be in json format.</param>
         /// <param name="dest">Destination directory to save output.</param>
-        public Manifest(FileInfo configFile, string dest)
+        public Manifest(FileInfo configFile, string dest, string? proxy = null)
         {
             _dest = dest;
-            Directory.CreateDirectory(dest);
+            if (dest != string.Empty)
+                Directory.CreateDirectory(dest);
 
             try
             {
@@ -41,29 +46,35 @@ namespace RediveExtract
                 throw;
             }
 
-            _client = new HttpClient
+            var handler = new HttpClientHandler();
+            if (proxy != null)
             {
-                BaseAddress = new Uri(ImgServer)
+                handler.Proxy = new WebProxy(proxy);
+            }
+
+            Client = new HttpClient(handler)
+            {
+                BaseAddress = new Uri(ImgServer),
             };
         }
 
         /// <summary>
         /// Save all manifests we can found.
         /// </summary>
-        public async Task SaveAllManifests()
+        public async Task SaveAllManifests(int maxTry = -1)
         {
-            var manifests = await SaveLatestAssetManifest();
+            var manifests = await SaveLatestAssetManifest(maxTry);
             var tasks = new List<Task>
             {
-                SaveLatestBundleManifest(), SaveMovieManifest(), SaveLowMovieManifest(), SaveSoundManifest()
+                SaveLatestBundleManifest(maxTry), SaveMovieManifest(), SaveLowMovieManifest(), SaveSoundManifest()
             };
 
             tasks.AddRange(ManifestItem
                 .ParseAll(manifests)
                 .Select(assetManifest =>
-                    SaveManifest(
-                        _config.ManifestPath() + assetManifest.Uri,
-                        CombinePath(assetManifest.Uri),
+                    SaveManifestIfNotExist(
+                        _config.AssetEndpoint(),
+                        assetManifest.Uri,
                         assetManifest.Md5)
                 )
             );
@@ -80,13 +91,235 @@ namespace RediveExtract
         private string CombinePath(string dest) => Path.Combine(_dest, dest);
 
         /// <summary>
-        /// Save a manifest file from <paramref name="requestUri"/> to <paramref name="writePath"/>.
+        /// Save latest asset manifest.
+        /// Try to guess latest asset manifest, then save it.
+        /// </summary>
+        /// <returns>A string containing content of manifest.</returns>
+        private async Task<string> SaveLatestAssetManifest(int maxTry = -1)
+        {
+            var (manifest, truthVersion) = await GuessNewTruthVersion(maxTry);
+            manifest ??= await GetAssetManifest(truthVersion);
+            
+            WriteAssetManifest(manifest);
+            _config.TruthVersion = truthVersion;
+            return manifest;
+        }
+
+        public async Task<(string? manifest, int truthVersion)> GuessNewTruthVersion(int maxTry = -1)
+        {
+            if (maxTry == -1)
+                maxTry = int.MaxValue;
+
+            var guessedVersions = new HashSet<int>();
+            var truthVersion = _config.TruthVersion;
+            string? manifest = null;
+
+            for (var i = 0; i < maxTry; i++)
+            {
+                var (newManifest, newTruthVersion) = await GuessNextTruthVersion(truthVersion, guessedVersions);
+                if (newManifest == null)
+                    break;
+                
+                (manifest, truthVersion) = (newManifest, newTruthVersion);
+            }
+
+            return (manifest, truthVersion);
+        }
+
+        private async Task<(string? manifest, int truthVersion)> GuessNextTruthVersion(int truthVersion, ISet<int> guessedVersions)
+        {
+            Console.WriteLine($":: Guessing asset manifest from {truthVersion}.");
+            string? manifest = null;
+
+            foreach (var guessDelta in _guessArray)
+            {
+                var guessDigits = (int)Math.Pow(10, Math.Floor(Math.Log10(guessDelta)));
+                var guessTruthVersion = truthVersion / guessDigits * guessDigits + guessDelta;
+
+                if (guessedVersions.Contains(guessTruthVersion))
+                    continue;
+
+                Console.Write($" Guessing TruthVersion: {guessTruthVersion}...");
+
+                try
+                {
+                    manifest = await GetAssetManifest(guessTruthVersion);
+                    Console.WriteLine("Yes!");
+                    return (manifest, guessTruthVersion);
+                }
+                catch (HttpRequestException)
+                {
+                    Console.WriteLine("No.");
+                    guessedVersions.Add(guessTruthVersion);
+                }
+            }
+
+            return (manifest, truthVersion);
+        }
+
+        /// <summary>
+        /// Save latest bundle manifest file.
+        /// </summary>
+        /// <returns>A string containing content of manifest.</returns>
+        private async Task<string> SaveLatestBundleManifest(int maxTry = -1)
+        {
+            var (manifest, version) = await GuessNewBundleVersion(maxTry);
+            manifest ??= await GetBundleManifest(version);
+            
+            WriteBundleManifest(manifest);
+            _config.Version = version;
+            return manifest;
+        }
+
+        public async Task<(string? manifest, int[] version)> GuessNewBundleVersion(int maxTry = -1)
+        {
+            if (maxTry == -1)
+                maxTry = int.MaxValue;
+
+            var guessedVersions = new HashSet<string>();
+            var version = _config.Version; // shallow copy
+            string? manifest = null;
+            
+            for (var i = 0; i < maxTry; i++)
+            {
+                var (newManifest, newVersion) = await GuessNextBundleVersion(version, guessedVersions);
+                if (newManifest == null)
+                    break;
+                
+                (manifest, version) = (newManifest, newVersion);
+            }
+
+            return (manifest, version);
+        }
+
+        private async Task<(string? manifest, int[] version)> GuessNextBundleVersion(
+            int[] version,
+            ISet<string> guessedVersions)
+        {
+            var tmpVersion = version.ToArray(); // deep copy
+            
+            Console.WriteLine($":: Guessing bundle manifest from {VersionString(tmpVersion)}.");
+            string? manifest = null;
+
+            for (var i = tmpVersion.Length - 1; i >= 0; i--)
+            {
+                tmpVersion[i]++;
+                if (guessedVersions.Contains(VersionString(tmpVersion)))
+                    continue;
+
+                Console.Write($" Guessing version: {VersionString(tmpVersion)}...");
+
+                try
+                {
+                    manifest = await GetBundleManifest(tmpVersion);
+                    Console.WriteLine("Yes!");
+                    return (manifest, tmpVersion);
+                }
+                catch (HttpRequestException)
+                {
+                    guessedVersions.Add(VersionString(tmpVersion));
+                    Console.WriteLine("No.");
+                    tmpVersion[i] = 0;
+                }
+            }
+
+            return (manifest, version);
+        }
+
+        private Task<string> GetAssetManifest(int truthVersion)
+        {
+            var config = _config with { TruthVersion = truthVersion };
+            return GetManifest(config.ManifestUri(ManifestFile.Asset));
+        }
+
+        private Task SaveAssetManifest() =>
+            SaveManifest(ManifestFile.Asset);
+
+        private void WriteAssetManifest(string manifest)
+        {
+            var path = CombinePath("manifest/manifest_assetmanifest");
+            var dir = Path.GetDirectoryName(path);
+            if (dir != null) Directory.CreateDirectory(dir);
+
+            File.WriteAllText(path, manifest);
+        }
+
+        private Task<string> GetBundleManifest(int[]? version = null)
+        {
+            var config = _config with { Version = version ?? _config.Version };
+            return GetManifest(config.ManifestUri(ManifestFile.Bundle));
+        }
+
+        private Task SaveBundleManifest() => SaveManifest(ManifestFile.Bundle);
+
+        private void WriteBundleManifest(string manifest) =>
+            File.WriteAllText(CombinePath(BundleManifest), manifest);
+
+        private async Task SaveMovieManifest()
+        {
+            await SaveManifest(ManifestFile.Movie);
+            await SaveManifest(ManifestFile.Movie2);
+        }
+
+        private async Task SaveLowMovieManifest()
+        {
+            await SaveManifest(ManifestFile.LowMovie);
+            await SaveManifest(ManifestFile.LowMovie2);
+        }
+
+        private async Task SaveSoundManifest()
+        {
+            await SaveManifest(ManifestFile.Sound);
+            await SaveManifest(ManifestFile.Sound2);
+        }
+
+        private async Task<string> GetManifest(string requestUri)
+        {
+            var m = await Client.GetAsync(requestUri);
+            m.EnsureSuccessStatusCode();
+            var manifests = await m.Content.ReadAsStringAsync();
+            return manifests;
+        }
+
+        /// <summary>
+        /// Save a manifest file  from <paramref name="requestEndpoint"/>/<paramref name="requestPath"/> to
+        /// <paramref name="writePath"/>.
+        /// </summary>
+        /// <param name="requestEndpoint">Remote endpoint to download file from.</param>
+        /// <param name="requestPath">Path to download file from.</param>
+        /// <param name="writePath">Path to write file.</param>
+        private async Task SaveManifest(string requestEndpoint, string requestPath, string writePath)
+        {
+            var requestUri = requestEndpoint + requestPath;
+            Console.WriteLine($"- {requestUri}");
+            var m = await Client.GetAsync(requestUri);
+
+            m.EnsureSuccessStatusCode();
+            await using var writeStream = File.OpenWrite(writePath);
+            await using var manifests = await m.Content.ReadAsStreamAsync();
+            await manifests.CopyToAsync(writeStream);
+        }
+
+        private Task SaveManifest(ManifestFile manifestFile) =>
+            SaveManifest(
+                _config.Endpoint(manifestFile),
+                _config.ManifestPath(manifestFile)
+            );
+
+        private Task SaveManifest(string requestEndpoint, string path)
+            => SaveManifest(requestEndpoint, path, CombinePath(path));
+
+        /// <summary>
+        /// Save a manifest file from <paramref name="requestEndpoint"/>/<paramref name="requestPath"/> to
+        /// <paramref name="writePath"/>.
         /// If <paramref name="md5Sum"/> is provided, skip saving if file already exists and checksum matches.
         /// </summary>
-        /// <param name="requestUri">Remote url to download file from.</param>
+        /// <param name="requestEndpoint">Remote endpoint to download file from.</param>
+        /// <param name="requestPath">Path to download file from.</param>
         /// <param name="writePath">Path to write file.</param>
         /// <param name="md5Sum">MD5 checksum.</param>
-        private async Task SaveManifest(string requestUri, string writePath, string md5Sum)
+        private async Task SaveManifestIfNotExist(string requestEndpoint, string requestPath, string writePath,
+            string md5Sum)
         {
             if (File.Exists(writePath))
             {
@@ -97,178 +330,17 @@ namespace RediveExtract
                     return;
             }
 
-            await SaveManifest(requestUri, writePath);
+            await SaveManifest(requestEndpoint, requestPath, writePath);
         }
 
-        /// <summary>
-        /// Save latest asset manifest.
-        /// Try to guess latest asset manifest, then save it.
-        /// </summary>
-        /// <returns>A string containing content of manifest.</returns>
-        private async Task<string> SaveLatestAssetManifest()
-        {
-            var guessArray = new[] { 1000, 100, 10, 1 };
-            var guessTruthVersion = _config.TruthVersion;
-            var manifest = await GetAssetManifest(guessTruthVersion);
-            Console.WriteLine($":: Saving asset manifest from {guessTruthVersion}.");
+        private Task SaveManifestIfNotExist(ManifestFile manifestFile, string md5Sum)
+            => SaveManifestIfNotExist(
+                _config.Endpoint(manifestFile),
+                _config.ManifestPath(manifestFile),
+                md5Sum);
 
-            foreach (var guessDelta in guessArray)
-            {
-                int tmpVersion;
-
-                while (true)
-                {
-                    tmpVersion = (guessTruthVersion / guessDelta + 1) * guessDelta;
-                    Console.Write($" Guessing TruthVersion: {tmpVersion}...");
-
-                    try
-                    {
-                        manifest = await GetAssetManifest(tmpVersion);
-                        Console.WriteLine("Yes!");
-                        guessTruthVersion = tmpVersion;
-                    }
-                    catch (HttpRequestException)
-                    {
-                        Console.WriteLine("No.");
-                        break;
-                    }
-                }
-
-                if (tmpVersion % 10 != 0) continue;
-
-                try
-                {
-                    manifest = await GetAssetManifest(tmpVersion);
-                    Console.WriteLine("Yes!");
-                    guessTruthVersion = tmpVersion;
-                }
-                catch (HttpRequestException)
-                {
-                    Console.WriteLine("No.");
-                }
-            }
-
-            SaveAssetManifest(manifest);
-            _config.TruthVersion = guessTruthVersion;
-            return manifest;
-        }
-
-        /// <summary>
-        /// Save latest bundle manifest file.
-        /// </summary>
-        /// <returns>A string containing content of manifest.</returns>
-        private async Task<string> SaveLatestBundleManifest()
-        {
-            var manifest = await GetBundleManifest();
-            var guessVersion = _config.Version; // shallow copy
-            Console.WriteLine($":: Saving bundle manifest from {Config.VersionString(guessVersion)}.");
-
-            for (var i = 0; i < guessVersion.Length; i++)
-            {
-                while (true)
-                {
-                    var tmpVersion = guessVersion.ToArray(); // deep copy
-                    tmpVersion[i]++;
-                    for (var j = i + 1; j < guessVersion.Length; j++)
-                        tmpVersion[j] = 0;
-
-                    Console.Write($" Guessing version: {Config.VersionString(tmpVersion)}...");
-
-                    try
-                    {
-                        manifest = await GetBundleManifest(tmpVersion);
-                        Console.WriteLine("Yes!");
-                        guessVersion = tmpVersion;
-                    }
-                    catch (HttpRequestException)
-                    {
-                        Console.WriteLine("No.");
-                        break;
-                    }
-                }
-            }
-
-            SaveBundleManifest(manifest);
-            _config.Version = guessVersion;
-            return manifest;
-        }
-
-        private Task<string> GetAssetManifest(int? truthVersion = null, string? locale = null, string? os = null) =>
-            GetManifest(
-                _config.ManifestPath(truthVersion, locale, os) + "manifest/manifest_assetmanifest");
-
-        private Task SaveAssetManifest(int? truthVersion = null, string? locale = null, string? os = null) =>
-            SaveManifest(
-                _config.ManifestPath(truthVersion, locale, os) + "manifest/manifest_assetmanifest",
-                CombinePath("manifest/manifest_assetmanifest"));
-
-        private void SaveAssetManifest(string manifest)
-        {
-            var path = CombinePath("manifest/manifest_assetmanifest");
-            var dir = Path.GetDirectoryName(path);
-            if (dir != null) Directory.CreateDirectory(dir);
-
-            File.WriteAllText(path, manifest);
-        }
-
-        private Task<string> GetBundleManifest(int[]? version = null, string? locale = null, string? os = null) =>
-            GetManifest(
-                _config.BundlesPath(version, locale, os) + "manifest/bdl_assetmanifest");
-
-        private Task SaveBundleManifest() => SaveManifest(
-            _config.BundlesPath() + "manifest/bdl_assetmanifest",
-            CombinePath("manifest/bdl_assetmanifest"));
-
-        private void SaveBundleManifest(string manifest) =>
-            File.WriteAllText(CombinePath("manifest/bdl_assetmanifest"), manifest);
-
-        private async Task SaveMovieManifest()
-        {
-            await SaveManifest(
-                _config.MoviePath() + "manifest/moviemanifest",
-                CombinePath("manifest/moviemanifest"));
-            await SaveManifest(
-                _config.MoviePath() + "manifest/movie2manifest",
-                CombinePath("manifest/movie2manifest"));
-        }
-
-        private async Task SaveLowMovieManifest()
-        {
-            await SaveManifest(
-                _config.LowMoviePath() + "manifest/moviemanifest",
-                CombinePath("manifest/low_moviemanifest"));
-            await SaveManifest(
-                _config.LowMoviePath() + "manifest/movie2manifest",
-                CombinePath("manifest/low_movie2manifest"));
-        }
-
-        private async Task SaveSoundManifest()
-        {
-            await SaveManifest(
-                _config.SoundPath() + "manifest/soundmanifest",
-                CombinePath("manifest/soundmanifest"));
-            await SaveManifest(
-                _config.SoundPath() + "manifest/sound2manifest",
-                CombinePath("manifest/sound2manifest"));
-        }
-
-        private async Task<string> GetManifest(string requestUri)
-        {
-            var m = await _client.GetAsync(requestUri);
-            m.EnsureSuccessStatusCode();
-            var manifests = await m.Content.ReadAsStringAsync();
-            return manifests;
-        }
-
-        private async Task SaveManifest(string requestUri, string writePath)
-        {
-            Console.WriteLine($"- {requestUri}");
-            var m = await _client.GetAsync(requestUri);
-            m.EnsureSuccessStatusCode();
-            await using var writeStream = File.OpenWrite(writePath);
-            await using var manifests = await m.Content.ReadAsStreamAsync();
-            await manifests.CopyToAsync(writeStream);
-        }
+        private Task SaveManifestIfNotExist(string requestEndpoint, string path, string md5Sum)
+            => SaveManifestIfNotExist(requestEndpoint, path, CombinePath(path), md5Sum);
 
         public void SaveConfig(FileInfo configFile)
         {
